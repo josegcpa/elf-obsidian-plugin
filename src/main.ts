@@ -8,7 +8,7 @@ import {
 } from "obsidian";
 import { DEFAULT_SETTINGS, ModeType, PluginSettings, Prompt } from "./types";
 import { writebraightSettingTab } from "./settings-tab";
-import { createProvider } from "./providers/factory";
+import { createProvider, PROVIDER_DEFAULT_MODELS } from "./providers/factory";
 import { runCollaborate, runRewrite } from "./engine";
 import { VariationsModal } from "./variations-modal";
 import { loadPromptsFile, savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
@@ -47,12 +47,14 @@ export default class writebraightPlugin extends Plugin {
       );
     });
 
-    // ── Command: Collaborate (default prompt) ─────────────────────────────────
+    // ── Command: Collaborate (apply default prompt) ─────────────────────────────────
     this.addCommand({
       id: "collaborate-default",
-      name: "Collaborate: continue writing (default prompt)",
+      name: "Collaborate: continue writing (apply default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "c" }],
-      editorCallback: (editor: Editor) => {
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         try {
           this.runEditorAction(editor, "collaborate", this.getDefaultCollaboratePrompt());
         } catch (e: unknown) {
@@ -61,12 +63,14 @@ export default class writebraightPlugin extends Plugin {
       },
     });
 
-    // ── Command: Rewrite (default prompt) ─────────────────────────────────────
+    // ── Command: Rewrite (apply default prompt) ─────────────────────────────────────
     this.addCommand({
       id: "rewrite-default",
-      name: "Rewrite: rewrite selection (default prompt)",
+      name: "Rewrite: rewrite selection (apply default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "r" }],
-      editorCallback: (editor: Editor) => {
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         try {
           this.runEditorAction(editor, "rewrite", this.getDefaultRewritePrompt());
         } catch (e: unknown) {
@@ -79,28 +83,36 @@ export default class writebraightPlugin extends Plugin {
     this.addCommand({
       id: "collaborate-pick",
       name: "Collaborate: pick a prompt…",
-      editorCallback: (editor: Editor) =>
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         this.showPromptPicker("collaborate", (prompt) =>
           this.runEditorAction(editor, "collaborate", prompt)
-        ),
+        );
+      },
     });
 
     // ── Command: Rewrite — pick prompt ────────────────────────────────────────
     this.addCommand({
       id: "rewrite-pick",
       name: "Rewrite: pick a prompt…",
-      editorCallback: (editor: Editor) =>
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         this.showPromptPicker("rewrite", (prompt) =>
           this.runEditorAction(editor, "rewrite", prompt)
-        ),
+        );
+      },
     });
 
-    // ── Command: Variations (default prompt) ─────────────────────────────────
+    // ── Command: Variations (apply default prompt) ─────────────────────────────────
     this.addCommand({
       id: "variations-default",
-      name: "Variations: generate variations (default prompt)",
+      name: "Variations: generate variations (apply default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "v" }],
-      editorCallback: (editor: Editor) => {
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         try {
           this.openVariationsModal(editor, this.getDefaultVariationsPrompt());
         } catch (e: unknown) {
@@ -113,10 +125,20 @@ export default class writebraightPlugin extends Plugin {
     this.addCommand({
       id: "variations-pick",
       name: "Variations: pick a prompt…",
-      editorCallback: (editor: Editor) =>
+      callback: () => {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
         this.showPromptPicker("variations", (prompt) =>
           this.openVariationsModal(editor, prompt)
-        ),
+        );
+      },
+    });
+
+    // ── Command: Select provider and model ────────────────────────────────────
+    this.addCommand({
+      id: "select-provider-model",
+      name: "Select provider and model…",
+      callback: () => this.showProviderModelPicker(),
     });
 
     // ── Right-click context menu ───────────────────────────────────────────────
@@ -252,6 +274,66 @@ export default class writebraightPlugin extends Plugin {
   }
 
   /**
+   * Open a two-step picker to select provider, then model.
+   * First shows provider list (defaulting to current), then model list
+   * (defaulting to current model for that provider).
+   */
+  private showProviderModelPicker(): void {
+    const providers = Object.keys(PROVIDER_DEFAULT_MODELS) as Array<keyof typeof PROVIDER_DEFAULT_MODELS>;
+    const app = this.app;
+    const settings = this.settings;
+    const plugin = this;
+
+    class ProviderPicker extends FuzzySuggestModal<string> {
+      constructor() { super(app); }
+      getItems(): string[] { return providers; }
+      getItemText(item: string): string { return item; }
+      onChooseItem(provider: string): void {
+        settings.provider = provider as typeof settings.provider;
+        // Show model picker for selected provider
+        plugin.showModelPicker();
+      }
+    }
+    new ProviderPicker().open();
+  }
+
+  /**
+   * Show model picker for the currently selected provider.
+   * Defaults to the currently selected model.
+   */
+  private async showModelPicker(): Promise<void> {
+    const provider = createProvider(this.settings);
+    const app = this.app;
+    const plugin = this;
+
+    const notice = new Notice("Loading models…", 0);
+    let models: string[] = [];
+    try {
+      models = await provider.listModels();
+    } catch {
+      // Fall back to empty list
+    }
+    notice.hide();
+
+    if (models.length === 0) {
+      new Notice("Could not fetch models. Check your API key.", 5000);
+      return;
+    }
+
+    class ModelPicker extends FuzzySuggestModal<string> {
+      constructor() { super(app); }
+      getItems(): string[] { return models; }
+      getItemText(item: string): string { return item; }
+      onChooseItem(model: string): void {
+        plugin.settings.model = model;
+        plugin.saveSettings();
+        new Notice(`Model set to ${model}`, 2000);
+      }
+    }
+    new ModelPicker().open();
+  }
+
+  /**
    * Open the Variations modal for the given editor and prompt.
    *
    * @param editor - The active editor.
@@ -293,6 +375,15 @@ export default class writebraightPlugin extends Plugin {
    * @param startMsg - Notice text shown while `fn` is running.
    * @param endMsg - Notice text shown on success.
    */
+  private getActiveEditor(): Editor | null {
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) {
+      new Notice("No active editor.", 3000);
+      return null;
+    }
+    return view.editor;
+  }
+
   private async runWithNotice(
     fn: () => Promise<void>,
     startMsg: string,

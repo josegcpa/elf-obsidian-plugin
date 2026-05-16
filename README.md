@@ -85,13 +85,13 @@ Choose which prompt from your library is used when you trigger the default comma
 
 | Command | Default hotkey | Description |
 |---|---|---|
-| Collaborate: continue writing (default prompt) | `Cmd/Ctrl + Shift + C` | Inserts AI continuation after the cursor |
-| Rewrite: rewrite selection (default prompt) | `Cmd/Ctrl + Shift + R` | Replaces selected text with AI rewrite |
-| Variations: generate variations (default prompt) | `Cmd/Ctrl + Shift + V` | Opens variations modal for selected text |
+| Collaborate: continue writing (apply default prompt) | `Cmd/Ctrl + Shift + C` | Inserts AI continuation after the cursor |
+| Rewrite: rewrite selection (apply default prompt) | `Cmd/Ctrl + Shift + R` | Replaces selected text with AI rewrite |
+| Variations: generate variations (apply default prompt) | `Cmd/Ctrl + Shift + V` | Opens variations modal for selected text |
 | Collaborate: pick a prompt… | — | Opens fuzzy picker of Collaborate prompts |
 | Rewrite: pick a prompt… | — | Opens fuzzy picker of Rewrite prompts |
 | Variations: pick a prompt… | — | Opens fuzzy picker of Variations prompts |
-| Open Prompt Library | — | Opens the prompt editor modal |
+| Select provider and model… | — | Opens the provider and model selection dialog |
 
 ### Variations modal
 
