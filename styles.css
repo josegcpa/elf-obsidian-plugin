@@ -1,0 +1,69 @@
+.wr-variations-modal {
+  min-width: 520px;
+}
+
+.wr-variations-status {
+  font-size: var(--font-smaller);
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.wr-variations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.wr-variation-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1.5;
+}
+
+.wr-variation-item:hover,
+.wr-variation-selected {
+  background: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border);
+}
+
+.wr-variation-num {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+}
+
+.wr-variation-text {
+  flex: 1;
+  white-space: pre-wrap;
+}
+
+.wr-variations-hint {
+  font-size: var(--font-smaller);
+  color: var(--text-faint);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.wr-prompt-section {
+  margin-bottom: 1rem;
+}
+
+.wr-textarea {
+  font-family: var(--font-monospace);
+  font-size: var(--font-smaller);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  resize: vertical;
+  box-sizing: border-box;
+}
