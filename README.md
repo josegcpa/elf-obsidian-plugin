@@ -135,9 +135,7 @@ src/
 ├── main.ts                    # Plugin entry point
 ├── types.ts                   # Shared types and default values
 ├── engine.ts                  # Collaborate, Rewrite & Variations logic
-├── github-sync.ts             # Gist push/pull helpers
 ├── settings-tab.ts            # Settings UI
-├── prompt-library-modal.ts    # Prompt editor modal
 ├── variations-modal.ts        # Variations navigation modal
 └── providers/
     ├── base.ts                # LLMProvider interface + postJson helper
@@ -192,3 +190,7 @@ Ollama tests are additionally skipped if the local server is unreachable or no m
 ## License
 
 MIT
+
+## Disclaimer
+
+This was written, in great part, with recourse to generative AI. In particular, I made use of a mixture of models within Windsurf to make a large part of this happen. 
