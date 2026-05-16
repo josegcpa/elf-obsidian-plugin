@@ -52,8 +52,79 @@
   margin-top: 4px;
 }
 
-.wr-prompt-section {
-  margin-bottom: 1rem;
+/* ── Settings sections ────────────────────────────────────────────────── */
+
+/* Consistent section spacing */
+.wr-prompt-library-section {
+  margin-top: 1.5rem;
+}
+
+.wr-prompt-library-section h3,
+.setting-item-heading {
+  margin-bottom: 0.75rem;
+}
+
+/* ── Compact prompt editor ──────────────────────────────────────────────── */
+
+.wr-prompt-editor {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  background: var(--background-secondary);
+}
+
+.wr-prompt-meta-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.wr-prompt-meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wr-prompt-meta-field input,
+.wr-prompt-meta-field select {
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-ui-small);
+  width: 100%;
+}
+
+.wr-field-label {
+  font-size: var(--font-smaller);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.wr-placeholder-hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: var(--font-smaller);
+}
+
+.wr-prompt-delete-row {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.wr-prompt-delete-row button {
+  font-size: var(--font-smaller);
+  cursor: pointer;
+}
+
+.wr-prompt-library-section hr {
+  border: none;
+  border-top: 1px solid var(--background-modifier-border);
+  margin: 0.5rem 0;
 }
 
 .wr-textarea {
@@ -63,7 +134,21 @@
   color: var(--text-normal);
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
-  padding: 6px 8px;
+  padding: 0.375rem 0.5rem;
   resize: vertical;
   box-sizing: border-box;
+}
+
+/* ── Notice positioning ─────────────────────────────────────────────── */
+
+/* Move notices from top-right to bottom-center */
+.notice-container {
+  top: auto !important;
+  bottom: 1rem !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

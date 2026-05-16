@@ -41,7 +41,9 @@ export class VariationsModal extends Modal {
     const hint = this.contentEl.createDiv({ cls: "wr-variations-hint" });
     hint.setText("↑↓ navigate · Enter accept · Shift+Enter regenerate · Esc cancel");
 
-    this.contentEl.addEventListener("keydown", this.onKeyDown.bind(this));
+    this.modalEl.tabIndex = 0;
+    this.modalEl.addEventListener("keydown", this.onKeyDown.bind(this));
+    this.modalEl.focus();
 
     this.generate();
   }

@@ -1,5 +1,6 @@
 import {
   Editor,
+  FuzzySuggestModal,
   MarkdownView,
   Menu,
   Notice,
@@ -7,10 +8,10 @@ import {
 } from "obsidian";
 import { DEFAULT_SETTINGS, ModeType, PluginSettings, Prompt } from "./types";
 import { WriterRewriterSettingTab } from "./settings-tab";
-import { PromptLibraryModal } from "./prompt-library-modal";
 import { createProvider } from "./providers/factory";
 import { runCollaborate, runRewrite } from "./engine";
 import { VariationsModal } from "./variations-modal";
+import { loadPromptsFile, savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
 
 /** Main plugin class — registered as the entry point in `manifest.json`. */
 export default class WriterRewriterPlugin extends Plugin {
@@ -23,11 +24,27 @@ export default class WriterRewriterPlugin extends Plugin {
     // ── Settings tab ──────────────────────────────────────────────────────────
     this.addSettingTab(new WriterRewriterSettingTab(this.app, this));
 
-    // ── Command: open prompt library ──────────────────────────────────────────
-    this.addCommand({
-      id: "open-prompt-library",
-      name: "Open Prompt Library",
-      callback: () => this.openPromptLibrary(),
+    // ── Load prompts file + watch for external edits (deferred until vault ready) ──
+    this.app.workspace.onLayoutReady(async () => {
+      const target = this.settings.promptsFilePath || PROMPTS_FILE_PATH;
+      try {
+        this.settings.prompts = await loadPromptsFile(this.app, target);
+      } catch (e) {
+        console.error("Writer Rewriter: failed to load prompts file", e);
+      }
+
+      this.registerEvent(
+        this.app.vault.on("modify", async (file) => {
+          const t = this.settings.promptsFilePath || PROMPTS_FILE_PATH;
+          if (file.path === t) {
+            try {
+              this.settings.prompts = await loadPromptsFile(this.app, t);
+            } catch (e) {
+              console.error("Writer Rewriter: failed to reload prompts file", e);
+            }
+          }
+        })
+      );
     });
 
     // ── Command: Collaborate (default prompt) ─────────────────────────────────
@@ -35,8 +52,13 @@ export default class WriterRewriterPlugin extends Plugin {
       id: "collaborate-default",
       name: "Collaborate: continue writing (default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "c" }],
-      editorCallback: (editor: Editor) =>
-        this.runEditorAction(editor, "collaborate", this.getDefaultCollaboratePrompt()),
+      editorCallback: (editor: Editor) => {
+        try {
+          this.runEditorAction(editor, "collaborate", this.getDefaultCollaboratePrompt());
+        } catch (e: unknown) {
+          new Notice(`Error: ${e instanceof Error ? e.message : String(e)}`, 5000);
+        }
+      },
     });
 
     // ── Command: Rewrite (default prompt) ─────────────────────────────────────
@@ -44,8 +66,13 @@ export default class WriterRewriterPlugin extends Plugin {
       id: "rewrite-default",
       name: "Rewrite: rewrite selection (default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "r" }],
-      editorCallback: (editor: Editor) =>
-        this.runEditorAction(editor, "rewrite", this.getDefaultRewritePrompt()),
+      editorCallback: (editor: Editor) => {
+        try {
+          this.runEditorAction(editor, "rewrite", this.getDefaultRewritePrompt());
+        } catch (e: unknown) {
+          new Notice(`Error: ${e instanceof Error ? e.message : String(e)}`, 5000);
+        }
+      },
     });
 
     // ── Command: Collaborate — pick prompt ────────────────────────────────────
@@ -73,8 +100,13 @@ export default class WriterRewriterPlugin extends Plugin {
       id: "variations-default",
       name: "Variations: generate variations (default prompt)",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "v" }],
-      editorCallback: (editor: Editor) =>
-        this.openVariationsModal(editor, this.getDefaultVariationsPrompt()),
+      editorCallback: (editor: Editor) => {
+        try {
+          this.openVariationsModal(editor, this.getDefaultVariationsPrompt());
+        } catch (e: unknown) {
+          new Notice(`Error: ${e instanceof Error ? e.message : String(e)}`, 5000);
+        }
+      },
     });
 
     // ── Command: Variations — pick prompt ─────────────────────────────────────
@@ -132,15 +164,26 @@ export default class WriterRewriterPlugin extends Plugin {
 
   /** Load settings from disk, merging with defaults to handle missing keys. */
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    if (!this.settings.prompts || this.settings.prompts.length === 0) {
-      this.settings.prompts = DEFAULT_SETTINGS.prompts;
+    const stored = await this.loadData() as Partial<typeof DEFAULT_SETTINGS> & { apiKey?: string };
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, stored);
+    if (!this.settings.apiKeys) {
+      this.settings.apiKeys = { ...DEFAULT_SETTINGS.apiKeys };
     }
+    if (stored?.apiKey) {
+      this.settings.apiKeys[this.settings.provider] = stored.apiKey;
+    }
+    // prompts are loaded from file once the vault is ready (see onload)
   }
 
   /** Persist current settings to disk. */
   async saveSettings(): Promise<void> {
-    await this.saveData(this.settings);
+    await savePromptsFile(
+      this.app,
+      this.settings.prompts,
+      this.settings.promptsFilePath || PROMPTS_FILE_PATH
+    );
+    const { prompts: _prompts, ...rest } = this.settings;
+    await this.saveData(rest);
   }
 
   /**
@@ -182,14 +225,6 @@ export default class WriterRewriterPlugin extends Plugin {
     return prompt;
   }
 
-  /** Open the Prompt Library modal for editing the prompt collection. */
-  private openPromptLibrary(): void {
-    new PromptLibraryModal(this.app, this.settings.prompts, async (prompts) => {
-      this.settings.prompts = prompts;
-      await this.saveSettings();
-    }).open();
-  }
-
   /**
    * Open a fuzzy-search picker listing all prompts for `mode`.
    *
@@ -206,14 +241,14 @@ export default class WriterRewriterPlugin extends Plugin {
       return;
     }
 
-    import("obsidian").then(({ FuzzySuggestModal }) => {
-      class PromptPicker extends FuzzySuggestModal<Prompt> {
-        getItems(): Prompt[] { return prompts; }
-        getItemText(item: Prompt): string { return item.name; }
-        onChooseItem(item: Prompt): void { onSelect(item); }
-      }
-      new PromptPicker(this.app).open();
-    });
+    const app = this.app;
+    class PromptPicker extends FuzzySuggestModal<Prompt> {
+      constructor() { super(app); }
+      getItems(): Prompt[] { return prompts; }
+      getItemText(item: Prompt): string { return item.name; }
+      onChooseItem(item: Prompt): void { onSelect(item); }
+    }
+    new PromptPicker().open();
   }
 
   /**

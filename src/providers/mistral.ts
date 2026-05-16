@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 /** Provider for the Mistral AI chat-completions API. */
@@ -32,13 +32,21 @@ export class MistralProvider implements LLMProvider {
   /**
    * Fetches available models from the Mistral `/models` endpoint.
    * Returns an empty array if the request fails.
+   *
+   * Filters to include only text generation models (excludes embedding,
+   * moderation, and multimodal models like pixtral and voxtral).
    */
   async listModels(): Promise<string[]> {
-    const response = await fetch(`${this.baseUrl}/models`, {
-      headers: { Authorization: `Bearer ${this.apiKey}` },
-    });
-    if (!response.ok) return [];
-    const data = await response.json() as { data: { id: string }[] };
-    return data.data.map((m) => m.id).sort();
+    const data = await getJson(`${this.baseUrl}/models`, {
+      Authorization: `Bearer ${this.apiKey}`,
+    }) as { data: { id: string }[] } | null;
+    if (!data) return [];
+
+    // Exclude known non-text model prefixes
+    const nonTextPrefixes = ["pixtral", "voxtral", "mistral-embed", "moderation"];
+    return data.data
+      .map((m) => m.id)
+      .filter((id) => !nonTextPrefixes.some((prefix) => id.toLowerCase().startsWith(prefix)))
+      .sort();
   }
 }

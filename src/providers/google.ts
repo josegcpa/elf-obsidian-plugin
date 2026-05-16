@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 
@@ -38,13 +38,10 @@ export class GoogleProvider implements LLMProvider {
    * Returns an empty array if the request fails.
    */
   async listModels(): Promise<string[]> {
-    const response = await fetch(
-      `${this.listBaseUrl}?key=${this.apiKey}`
-    );
-    if (!response.ok) return [];
-    const data = (await response.json()) as {
+    const data = await getJson(`${this.listBaseUrl}?key=${this.apiKey}`, {}) as {
       models?: { name: string; supportedGenerationMethods?: string[] }[];
-    };
+    } | null;
+    if (!data) return [];
     return (data.models ?? [])
       .filter((m) => m.supportedGenerationMethods?.includes("generateContent"))
       .map((m) => m.name.replace(/^models\//, ""))

@@ -1,3 +1,4 @@
+import { requestUrl } from "obsidian";
 import { LLMRequest, LLMResponse } from "../types";
 
 /**
@@ -37,16 +38,49 @@ export async function postJson(
   body: unknown,
   errorPrefix: string
 ): Promise<unknown> {
-  const response = await fetch(url, {
+  const response = await requestUrl({
+    url,
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
+    throw: false,
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`${errorPrefix} (${response.status}): ${text}`);
+  if (response.status < 200 || response.status >= 300) {
+    // Try to extract a readable message from the response
+    let message = response.text;
+    try {
+      const json = JSON.parse(response.text);
+      message = json.error?.message || json.message || response.text;
+    } catch {
+      // response.text is not JSON, use as-is (truncated if too long)
+      if (message.length > 200) {
+        message = message.slice(0, 200) + "…";
+      }
+    }
+    throw new Error(`Error (status code: ${response.status})! ${message}`);
   }
 
-  return response.json();
+  return response.json;
+}
+
+/**
+ * Send a GET request and return the parsed response body.
+ *
+ * @param url - Target URL.
+ * @param headers - HTTP headers.
+ * @returns Parsed JSON response, or null if the request fails.
+ */
+export async function getJson(
+  url: string,
+  headers: Record<string, string>
+): Promise<unknown> {
+  const response = await requestUrl({
+    url,
+    method: "GET",
+    headers,
+    throw: false,
+  });
+  if (response.status < 200 || response.status >= 300) return null;
+  return response.json;
 }

@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 /** Provider for the Anthropic Messages API. */
@@ -35,14 +35,11 @@ export class AnthropicProvider implements LLMProvider {
    * Returns an empty array if the request fails.
    */
   async listModels(): Promise<string[]> {
-    const response = await fetch(`${this.baseUrl}/models`, {
-      headers: {
-        "x-api-key": this.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-    });
-    if (!response.ok) return [];
-    const data = (await response.json()) as { data: { id: string }[] };
+    const data = await getJson(`${this.baseUrl}/models`, {
+      "x-api-key": this.apiKey,
+      "anthropic-version": "2023-06-01",
+    }) as { data: { id: string }[] } | null;
+    if (!data) return [];
     return data.data.map((m) => m.id).sort();
   }
 }

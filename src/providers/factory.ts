@@ -15,7 +15,8 @@ import { OpenRouterProvider } from "./openrouter";
  * @throws If `settings.provider` is not a recognised `ProviderType`.
  */
 export function createProvider(settings: PluginSettings): LLMProvider {
-  const { provider, model, apiKey, ollamaBaseUrl } = settings;
+  const { provider, model, apiKeys, ollamaBaseUrl } = settings;
+  const apiKey = (apiKeys ?? {})[provider] ?? "";
 
   switch (provider as ProviderType) {
     case "openai":

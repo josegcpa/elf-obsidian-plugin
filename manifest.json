@@ -1,11 +1,11 @@
 {
   "id": "writer-rewriter-plugin",
-  "name": "Writer Rewriter",
-  "version": "1.0.0",
-  "minAppVersion": "1.0.0",
-  "description": "AI writing assistant with multiple providers: collaborate and rewrite modes.",
-  "author": "Writer Rewriter",
-  "authorUrl": "",
-  "fundingUrl": "",
+  "name": "WRITE BRAIGHT",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.0",
+  "description": "Get some help with your writing from your favourite AI.",
+  "author": "José Guilherme de Almeida",
+  "authorUrl": "https://josegcpa.net",
+  "fundingUrl": "https://buymeacoffee.com/josegcpa",
   "isDesktopOnly": false
 }

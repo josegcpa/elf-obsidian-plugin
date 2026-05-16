@@ -39,8 +39,8 @@ export interface PluginSettings {
   provider: ProviderType;
   /** Model identifier sent to the provider API. */
   model: string;
-  /** API key for cloud providers (not used by Ollama). */
-  apiKey: string;
+  /** API keys keyed by provider (not used by Ollama). */
+  apiKeys: Record<string, string>;
   /** Base URL for a local Ollama server. */
   ollamaBaseUrl: string;
   /** ID of the prompt used by default in Collaborate mode. */
@@ -51,10 +51,8 @@ export interface PluginSettings {
   defaultVariationsPromptId: string;
   /** Full prompt library. */
   prompts: Prompt[];
-  /** GitHub personal access token (gist scope) for prompt sync. */
-  githubToken: string;
-  /** GitHub Gist ID used for prompt sync; empty string means "create on first push". */
-  githubGistId: string;
+  /** Vault-relative path to the prompts markdown file. */
+  promptsFilePath: string;
 }
 
 /** Payload sent to any `LLMProvider.complete` call. */
@@ -126,12 +124,11 @@ export const DEFAULT_PROMPTS: Prompt[] = [
 export const DEFAULT_SETTINGS: PluginSettings = {
   provider: "openai",
   model: "gpt-4o-mini",
-  apiKey: "",
+  apiKeys: { openai: "", anthropic: "", google: "", mistral: "", openrouter: "", ollama: "" },
   ollamaBaseUrl: "http://localhost:11434",
   defaultCollaboratePromptId: "collaborate-default",
   defaultRewritePromptId: "rewrite-default",
   defaultVariationsPromptId: "variations-default",
   prompts: DEFAULT_PROMPTS,
-  githubToken: "",
-  githubGistId: "",
+  promptsFilePath: "prompts.md",
 };

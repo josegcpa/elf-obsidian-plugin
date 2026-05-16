@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 /**
@@ -34,16 +34,36 @@ export class OpenAIProvider implements LLMProvider {
   /**
    * Fetches available GPT models from the OpenAI `/models` endpoint.
    * Returns an empty array if the request fails.
+   *
+   * Filters to include only text generation models (excludes DALL-E, TTS,
+   * Whisper, embedding models, and other non-chat models).
    */
   async listModels(): Promise<string[]> {
-    const response = await fetch(`${this.baseUrl}/models`, {
-      headers: { Authorization: `Bearer ${this.apiKey}` },
-    });
-    if (!response.ok) return [];
-    const data = await response.json() as { data: { id: string }[] };
+    const data = await getJson(`${this.baseUrl}/models`, {
+      Authorization: `Bearer ${this.apiKey}`,
+    }) as { data: { id: string }[] } | null;
+    if (!data) return [];
+
+    // Include GPT and O-series models, exclude known non-text prefixes
+    const textPrefixes = ["gpt", "o1", "o3"];
+    const nonTextPatterns = [
+      "dall-e", "tts", "whisper", 
+      "embedding", "text-embedding", 
+      "babbage", "davinci",
+      "audio", "transcribe", 
+      "realtime", "-image-",
+    ];
+
     return data.data
       .map((m) => m.id)
-      .filter((id) => id.startsWith("gpt"))
+      .filter((id) => {
+        const lowerId = id.toLowerCase();
+        // Must start with a text model prefix
+        if (!textPrefixes.some((p) => lowerId.startsWith(p))) return false;
+        // Must NOT match non-text patterns
+        if (nonTextPatterns.some((p) => lowerId.includes(p))) return false;
+        return true;
+      })
       .sort();
   }
 }

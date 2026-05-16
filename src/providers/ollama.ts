@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 /**
@@ -37,9 +37,8 @@ export class OllamaProvider implements LLMProvider {
    */
   async listModels(): Promise<string[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/tags`);
-      if (!response.ok) return [];
-      const data = await response.json() as { models: { name: string }[] };
+      const data = await getJson(`${this.baseUrl}/api/tags`, {}) as { models: { name: string }[] } | null;
+      if (!data) return [];
       return data.models.map((m) => m.name).sort();
     } catch {
       return [];

@@ -1,4 +1,4 @@
-import { LLMProvider, postJson } from "./base";
+import { LLMProvider, getJson, postJson } from "./base";
 import { LLMRequest, LLMResponse } from "../types";
 
 /**
@@ -41,11 +41,10 @@ export class OpenRouterProvider implements LLMProvider {
    * Returns an empty array if the request fails.
    */
   async listModels(): Promise<string[]> {
-    const response = await fetch(`${this.baseUrl}/models`, {
-      headers: { Authorization: `Bearer ${this.apiKey}` },
-    });
-    if (!response.ok) return [];
-    const data = await response.json() as { data: { id: string }[] };
+    const data = await getJson(`${this.baseUrl}/models`, {
+      Authorization: `Bearer ${this.apiKey}`,
+    }) as { data: { id: string }[] } | null;
+    if (!data) return [];
     return data.data.map((m) => m.id).sort();
   }
 }
