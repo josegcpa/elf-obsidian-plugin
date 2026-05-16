@@ -1,6 +1,6 @@
 {
-  "name": "writer-rewriter-plugin",
-  "version": "1.0.0",
+  "name": "write-braight-plugin",
+  "version": "0.1.0",
   "description": "AI writing assistant Obsidian plugin",
   "main": "main.js",
   "scripts": {

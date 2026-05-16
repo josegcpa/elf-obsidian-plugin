@@ -1,6 +1,6 @@
 {
-  "id": "writer-rewriter-plugin",
-  "name": "WRITE BRAIGHT",
+  "id": "write-braight-plugin",
+  "name": "write.braight",
   "version": "0.1.0",
   "minAppVersion": "0.1.0",
   "description": "Get some help with your writing from your favourite AI.",

@@ -1,5 +1,5 @@
 import { App, FuzzySuggestModal, Notice, PluginSettingTab, Setting, TextComponent } from "obsidian";
-import WriterRewriterPlugin from "./main";
+import writebraightPlugin from "./main";
 import { ModeType, PluginSettings, ProviderType } from "./types";
 import { createProvider, PROVIDER_DEFAULT_MODELS } from "./providers/factory";
 import { savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
@@ -22,11 +22,11 @@ const PROVIDERS: { value: ProviderType; label: string }[] = [
  * - Default prompt selection for each mode
  * - Prompt library inline editing with file picker
  */
-export class WriterRewriterSettingTab extends PluginSettingTab {
+export class writebraightSettingTab extends PluginSettingTab {
   /** Index of the prompt currently open in the inline editor (-1 = none). */
   private selectedPromptIndex = -1;
 
-  constructor(app: App, private plugin: WriterRewriterPlugin) {
+  constructor(app: App, private plugin: writebraightPlugin) {
     super(app, plugin);
   }
 
@@ -34,7 +34,7 @@ export class WriterRewriterSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Writer Rewriter Settings" });
+    containerEl.createEl("h2", { text: "write.braight Settings" });
 
     const s = this.plugin.settings;
     const modelSectionEl = document.createElement("div");

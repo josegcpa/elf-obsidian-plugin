@@ -1,4 +1,4 @@
-# Writer Rewriter Plugin
+# write.braight Plugin
 
 An [Obsidian](https://obsidian.md) plugin that brings AI writing assistance into your vault.  
 It supports **six providers** and three distinct **modes of action**.
@@ -35,7 +35,7 @@ It supports **six providers** and three distinct **modes of action**.
 1. Clone this repository into your vault's plugin folder:
 
    ```
-   <vault>/.obsidian/plugins/writer-rewriter-plugin/
+   <vault>/.obsidian/plugins/write-braight-plugin/
    ```
 
 2. Install dependencies and build:
@@ -46,7 +46,7 @@ It supports **six providers** and three distinct **modes of action**.
    ```
 
 3. Open Obsidian → **Settings → Community plugins → Installed plugins** and enable  
-   **Writer Rewriter**.
+   **write.braight**.
 
 > **Hot-reload during development:** run `npm run dev` instead of `npm run build`.  
 > esbuild will watch for changes and rebuild `main.js` automatically.
@@ -55,7 +55,7 @@ It supports **six providers** and three distinct **modes of action**.
 
 ## Configuration
 
-Open **Settings → Writer Rewriter**.
+Open **Settings → write.braight**.
 
 ### Provider & Model
 

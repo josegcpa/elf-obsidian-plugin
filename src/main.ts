@@ -7,14 +7,14 @@ import {
   Plugin,
 } from "obsidian";
 import { DEFAULT_SETTINGS, ModeType, PluginSettings, Prompt } from "./types";
-import { WriterRewriterSettingTab } from "./settings-tab";
+import { writebraightSettingTab } from "./settings-tab";
 import { createProvider } from "./providers/factory";
 import { runCollaborate, runRewrite } from "./engine";
 import { VariationsModal } from "./variations-modal";
 import { loadPromptsFile, savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
 
 /** Main plugin class — registered as the entry point in `manifest.json`. */
-export default class WriterRewriterPlugin extends Plugin {
+export default class writebraightPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS;
 
   /** Called by Obsidian when the plugin is enabled. Registers all commands and UI elements. */
@@ -22,7 +22,7 @@ export default class WriterRewriterPlugin extends Plugin {
     await this.loadSettings();
 
     // ── Settings tab ──────────────────────────────────────────────────────────
-    this.addSettingTab(new WriterRewriterSettingTab(this.app, this));
+    this.addSettingTab(new writebraightSettingTab(this.app, this));
 
     // ── Load prompts file + watch for external edits (deferred until vault ready) ──
     this.app.workspace.onLayoutReady(async () => {
@@ -30,7 +30,7 @@ export default class WriterRewriterPlugin extends Plugin {
       try {
         this.settings.prompts = await loadPromptsFile(this.app, target);
       } catch (e) {
-        console.error("Writer Rewriter: failed to load prompts file", e);
+        console.error("write.braight: failed to load prompts file", e);
       }
 
       this.registerEvent(
@@ -40,7 +40,7 @@ export default class WriterRewriterPlugin extends Plugin {
             try {
               this.settings.prompts = await loadPromptsFile(this.app, t);
             } catch (e) {
-              console.error("Writer Rewriter: failed to reload prompts file", e);
+              console.error("write.braight: failed to reload prompts file", e);
             }
           }
         })

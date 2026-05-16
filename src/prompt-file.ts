@@ -26,7 +26,7 @@ export const PROMPTS_FILE_PATH = "prompts.md";
  */
 export function serialisePrompts(prompts: Prompt[]): string {
   const header =
-    "<!-- Writer Rewriter prompt library — edit freely, the plugin will reload on save -->\n\n";
+    "<!-- write.braight prompt library — edit freely, the plugin will reload on save -->\n\n";
 
   const blocks = prompts.map((p) =>
     [
