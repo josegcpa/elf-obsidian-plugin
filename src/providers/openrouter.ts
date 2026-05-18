@@ -19,8 +19,8 @@ export class OpenRouterProvider implements LLMProvider {
       `${this.baseUrl}/chat/completions`,
       {
         Authorization: `Bearer ${this.apiKey}`,
-        "HTTP-Referer": "obsidian://write-braight",
-        "X-Title": "write.braight Plugin",
+        "HTTP-Referer": "obsidian://elf",
+        "X-Title": "Elf Plugin",
       },
       {
         model: this.model,

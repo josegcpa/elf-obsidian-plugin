@@ -30,7 +30,7 @@ export default class writebraightPlugin extends Plugin {
       try {
         this.settings.prompts = await loadPromptsFile(this.app, target);
       } catch (e) {
-        console.error("write.braight: failed to load prompts file", e);
+        console.error("Elf: failed to load prompts file", e);
       }
 
       this.registerEvent(
@@ -40,7 +40,7 @@ export default class writebraightPlugin extends Plugin {
             try {
               this.settings.prompts = await loadPromptsFile(this.app, t);
             } catch (e) {
-              console.error("write.braight: failed to reload prompts file", e);
+              console.error("Elf: failed to reload prompts file", e);
             }
           }
         })

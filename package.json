@@ -1,7 +1,7 @@
 {
-  "name": "write-braight-plugin",
+  "name": "elf-plugin",
   "version": "0.1.0",
-  "description": "AI writing assistant Obsidian plugin",
+  "description": "Get some help with your writing from your favourite assistant.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

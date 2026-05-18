@@ -34,7 +34,7 @@ export class writebraightSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "write.braight Settings" });
+    containerEl.createEl("h2", { text: "Elf Settings" });
 
     const s = this.plugin.settings;
     const modelSectionEl = document.createElement("div");

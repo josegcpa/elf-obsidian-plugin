@@ -1,4 +1,4 @@
-# write.braight Plugin
+# Elf Obsidian plugin
 
 An [Obsidian](https://obsidian.md) plugin that brings AI writing assistance into your vault.  
 It supports **six providers** and three distinct **modes of action**.
@@ -35,7 +35,7 @@ It supports **six providers** and three distinct **modes of action**.
 1. Clone this repository into your vault's plugin folder:
 
    ```
-   <vault>/.obsidian/plugins/write-braight-plugin/
+   <vault>/.obsidian/plugins/elf-plugin/
    ```
 
 2. Install dependencies and build:
@@ -45,8 +45,7 @@ It supports **six providers** and three distinct **modes of action**.
    npm run build
    ```
 
-3. Open Obsidian → **Settings → Community plugins → Installed plugins** and enable  
-   **write.braight**.
+3. Open Obsidian → **Settings → Community plugins → Installed plugins** and enable **Elf**.
 
 > **Hot-reload during development:** run `npm run dev` instead of `npm run build`.  
 > esbuild will watch for changes and rebuild `main.js` automatically.
@@ -55,7 +54,7 @@ It supports **six providers** and three distinct **modes of action**.
 
 ## Configuration
 
-Open **Settings → write.braight**.
+Open **Settings → Elf**.
 
 ### Provider & Model
 
