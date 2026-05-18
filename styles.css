@@ -110,13 +110,14 @@
   font-size: var(--font-smaller);
 }
 
-.wr-prompt-delete-row {
+.wr-prompt-action-row {
   margin-top: 0.75rem;
   display: flex;
+  gap: 0.5rem;
   justify-content: flex-end;
 }
 
-.wr-prompt-delete-row button {
+.wr-prompt-action-row button {
   font-size: var(--font-smaller);
   cursor: pointer;
 }

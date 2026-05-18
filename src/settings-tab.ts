@@ -1,6 +1,6 @@
 import { App, FuzzySuggestModal, Notice, PluginSettingTab, Setting, TextComponent } from "obsidian";
 import writebraightPlugin from "./main";
-import { ModeType, PluginSettings, ProviderType } from "./types";
+import { DEFAULT_PROMPTS, ModeType, PluginSettings, ProviderType } from "./types";
 import { createProvider, PROVIDER_DEFAULT_MODELS } from "./providers/factory";
 import { savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
 
@@ -204,6 +204,19 @@ export class writebraightSettingTab extends PluginSettingTab {
 
   /** Render dropdowns for the default Collaborate, Rewrite, and Variations prompts. */
   private renderDefaultPromptsSection(el: HTMLElement, s: PluginSettings): void {
+    const existing = el.querySelector(".wr-default-prompts-section");
+    let sectionEl: HTMLElement;
+    if (existing) {
+      sectionEl = existing as HTMLElement;
+      sectionEl.empty();
+    } else {
+      sectionEl = el.createDiv({ cls: "wr-default-prompts-section" });
+    }
+    this.renderDefaultPromptsSectionInto(sectionEl, s);
+  }
+
+  /** Populate an already-mounted default-prompts container. */
+  private renderDefaultPromptsSectionInto(el: HTMLElement, s: PluginSettings): void {
     el.createEl("h3", { text: "Default Prompts" });
 
     new Setting(el)
@@ -300,12 +313,14 @@ export class writebraightSettingTab extends PluginSettingTab {
       })
       .addButton((btn) =>
         btn.setButtonText("+ Add").onClick(async () => {
+          // Default new prompt to the first DEFAULT_PROMPTS entry for "rewrite" mode
+          const template = DEFAULT_PROMPTS.find((p) => p.mode === "rewrite")!;
           s.prompts.push({
             id: `prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             name: "New prompt",
             mode: "rewrite",
-            systemPrompt: "",
-            userPromptTemplate: "",
+            systemPrompt: template.systemPrompt,
+            userPromptTemplate: template.userPromptTemplate,
           });
           this.selectedPromptIndex = s.prompts.length - 1;
           await this.plugin.saveSettings();
@@ -320,11 +335,6 @@ export class writebraightSettingTab extends PluginSettingTab {
     sectionEl.createEl("hr");
     const editorEl = sectionEl.createDiv({ cls: "wr-prompt-editor" });
 
-    const save = async () => {
-      await savePromptsFile(this.app, s.prompts, s.promptsFilePath);
-      await this.plugin.saveSettings();
-    };
-
     // ── Row 1: name + mode on one line ──────────────────────────────────────
     const metaRow = editorEl.createDiv({ cls: "wr-prompt-meta-row" });
 
@@ -333,9 +343,14 @@ export class writebraightSettingTab extends PluginSettingTab {
     const nameInput = nameWrap.createEl("input", { type: "text" }) as HTMLInputElement;
     nameInput.value = prompt.name;
     nameInput.style.width = "100%";
-    nameInput.addEventListener("input", async () => {
+    nameInput.addEventListener("input", () => {
       s.prompts[idx].name = nameInput.value;
-      await save();
+      // Refresh default prompt dropdowns so renamed prompts appear immediately
+      const defaultsEl = el.querySelector(".wr-default-prompts-section") as HTMLElement | null;
+      if (defaultsEl) {
+        defaultsEl.empty();
+        this.renderDefaultPromptsSectionInto(defaultsEl, s);
+      }
     });
 
     const modeWrap = metaRow.createDiv({ cls: "wr-prompt-meta-field" });
@@ -345,16 +360,22 @@ export class writebraightSettingTab extends PluginSettingTab {
       const opt = modeSelect.createEl("option", { value: m, text: m.charAt(0).toUpperCase() + m.slice(1) });
       if (m === prompt.mode) opt.selected = true;
     });
-    modeSelect.addEventListener("change", async () => {
+    modeSelect.addEventListener("change", () => {
       s.prompts[idx].mode = modeSelect.value as ModeType;
-      await save();
+      // Apply template defaults for the newly selected mode
+      const template = DEFAULT_PROMPTS.find((p) => p.mode === s.prompts[idx].mode);
+      if (template) {
+        sysTa.value = template.systemPrompt;
+        userTa.value = template.userPromptTemplate;
+        s.prompts[idx].systemPrompt = template.systemPrompt;
+        s.prompts[idx].userPromptTemplate = template.userPromptTemplate;
+      }
     });
 
     // ── Row 2: system prompt textarea ────────────────────────────────────────
     editorEl.createEl("label", { text: "System prompt", cls: "wr-field-label" });
-    this.addTextarea(editorEl, prompt.systemPrompt, 4, async (v) => {
+    const sysTa = this.createTextarea(editorEl, prompt.systemPrompt, 4, (v) => {
       s.prompts[idx].systemPrompt = v;
-      await save();
     });
 
     // ── Row 3: user prompt textarea ──────────────────────────────────────────
@@ -363,14 +384,23 @@ export class writebraightSettingTab extends PluginSettingTab {
       text: "Placeholders: {{context}}, {{selected}}, {{before}}, {{after}}, {{n}}",
       cls: "setting-item-description wr-placeholder-hint",
     });
-    this.addTextarea(editorEl, prompt.userPromptTemplate, 4, async (v) => {
+    const userTa = this.createTextarea(editorEl, prompt.userPromptTemplate, 4, (v) => {
       s.prompts[idx].userPromptTemplate = v;
-      await save();
     });
 
-    // ── Delete button ─────────────────────────────────────────────────────────
-    const deleteRow = editorEl.createDiv({ cls: "wr-prompt-delete-row" });
-    const deleteBtn = deleteRow.createEl("button", { text: "Delete prompt", cls: "mod-warning" });
+    // ── Action row: Save + Delete ─────────────────────────────────────────────
+    const actionRow = editorEl.createDiv({ cls: "wr-prompt-action-row" });
+
+    const saveBtn = actionRow.createEl("button", { text: "Save prompt", cls: "mod-cta" });
+    saveBtn.addEventListener("click", async () => {
+      await savePromptsFile(this.app, s.prompts, s.promptsFilePath);
+      await this.plugin.saveSettings();
+      this.selectedPromptIndex = -1;
+      new Notice("Prompt saved.", 2000);
+      this.display();
+    });
+
+    const deleteBtn = actionRow.createEl("button", { text: "Delete prompt", cls: "mod-warning" });
     deleteBtn.addEventListener("click", async () => {
       s.prompts.splice(idx, 1);
       this.selectedPromptIndex = -1;
@@ -380,24 +410,25 @@ export class writebraightSettingTab extends PluginSettingTab {
   }
 
   /**
-   * Append an auto-resizing textarea to `container`.
+   * Append a textarea to `container` and return it.
    *
    * @param container - Parent element to append the textarea to.
    * @param value - Initial text content.
    * @param rows - Initial row count for the textarea.
    * @param onChange - Callback invoked on every input event with the current value.
    */
-  private addTextarea(
+  private createTextarea(
     container: HTMLElement,
     value: string,
     rows: number,
     onChange: (v: string) => void
-  ): void {
+  ): HTMLTextAreaElement {
     const ta = container.createEl("textarea", { cls: "wr-textarea" }) as HTMLTextAreaElement;
     ta.value = value;
     ta.rows = rows;
     ta.style.width = "100%";
     ta.style.marginBottom = "0.75em";
     ta.addEventListener("input", () => onChange(ta.value));
+    return ta;
   }
 }
