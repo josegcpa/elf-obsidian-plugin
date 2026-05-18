@@ -399,7 +399,7 @@ export class writebraightSettingTab extends PluginSettingTab {
     // ── Row 3: user prompt textarea ──────────────────────────────────────────
     editorEl.createEl("label", { text: "User prompt template", cls: "wr-field-label" });
     editorEl.createEl("p", {
-      text: "Placeholders: {{context}}, {{selected}}, {{before}}, {{after}}, {{n}}",
+      text: "Placeholders: {{before}} (paragraph before when collaborating, up to 500 characters before for rewrite/variations), {{after}} (up to 500 characters after for rewrite/variations), {{selected}}, {{n}}",
       cls: "setting-item-description wr-placeholder-hint",
     });
     const userTa = this.createTextarea(editorEl, prompt.userPromptTemplate, 4, (v) => {

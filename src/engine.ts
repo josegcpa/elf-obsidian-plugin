@@ -89,8 +89,8 @@ export async function runCollaborate(
   provider: LLMProvider,
   prompt: Prompt
 ): Promise<void> {
-  const context = getParagraphContext(editor);
-  const userPrompt = renderTemplate(prompt.userPromptTemplate, { context });
+  const before = getParagraphContext(editor);
+  const userPrompt = renderTemplate(prompt.userPromptTemplate, { before });
 
   const response = await provider.complete({
     systemPrompt: prompt.systemPrompt,

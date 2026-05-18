@@ -14,10 +14,9 @@ export type ModeType = "collaborate" | "rewrite" | "variations";
  * A user-defined prompt stored in the prompt library.
  *
  * Templates support these placeholders:
- * - `{{context}}` — the paragraph text up to the cursor (collaborate mode)
- * - `{{selected}}` — the currently selected text (rewrite / variations mode)
- * - `{{before}}` — the text immediately before the selection (rewrite / variations mode)
- * - `{{after}}` — the text immediately after the selection (rewrite / variations mode)
+ * - `{{before}}` — text before the cursor / selection (up to 500 characters)
+ * - `{{after}}` — text after the cursor / selection (up to 500 characters; rewrite / variations only)
+ * - `{{selected}}` — the currently selected text (rewrite / variations mode only)
  * - `{{n}}` — number of variations to generate (variations mode only)
  */
 export interface Prompt {
@@ -29,7 +28,7 @@ export interface Prompt {
   mode: ModeType;
   /** Instruction given to the model as the system message. */
   systemPrompt: string;
-  /** User message sent to the model; may contain `{{context}}` or `{{selected}}`. */
+  /** User message sent to the model; may contain `{{before}}`, `{{after}}`, `{{selected}}`, or `{{n}}`. */
   userPromptTemplate: string;
 }
 
@@ -83,7 +82,7 @@ export const DEFAULT_PROMPTS: Prompt[] = [
     mode: "collaborate",
     systemPrompt:
       "You are a skilled writing assistant. Continue the text provided by the user, maintaining their voice, style, and tone. Output only the continuation — do not repeat what was already written.",
-    userPromptTemplate: "Continue writing from here:\n\n{{context}}",
+    userPromptTemplate: "Continue writing from here:\n\n{{before}}",
   },
   {
     id: "rewrite-default",

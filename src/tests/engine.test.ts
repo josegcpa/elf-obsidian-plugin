@@ -1,8 +1,8 @@
 import { renderTemplate, getParagraphContext } from "../engine";
 
 describe("renderTemplate", () => {
-  it("substitutes {{context}}", () => {
-    const result = renderTemplate("Hello {{context}}!", { context: "world" });
+  it("substitutes {{before}}", () => {
+    const result = renderTemplate("Hello {{before}}!", { before: "world" });
     expect(result).toBe("Hello world!");
   });
 
