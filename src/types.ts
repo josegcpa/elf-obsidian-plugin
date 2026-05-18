@@ -39,6 +39,8 @@ export interface PluginSettings {
   provider: ProviderType;
   /** Model identifier sent to the provider API. */
   model: string;
+  /** Last-used model for each provider, used to restore selection when switching. */
+  modelPerProvider: Partial<Record<ProviderType, string>>;
   /** API keys keyed by provider (not used by Ollama). */
   apiKeys: Record<string, string>;
   /** Base URL for a local Ollama server. */
@@ -124,6 +126,7 @@ export const DEFAULT_PROMPTS: Prompt[] = [
 export const DEFAULT_SETTINGS: PluginSettings = {
   provider: "openai",
   model: "gpt-4o-mini",
+  modelPerProvider: {},
   apiKeys: { openai: "", anthropic: "", google: "", mistral: "", openrouter: "", ollama: "" },
   ollamaBaseUrl: "http://localhost:11434",
   defaultCollaboratePromptId: "collaborate-default",

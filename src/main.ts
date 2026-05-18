@@ -13,9 +13,48 @@ import { runCollaborate, runRewrite } from "./engine";
 import { VariationsModal } from "./variations-modal";
 import { loadPromptsFile, savePromptsFile, PROMPTS_FILE_PATH } from "./prompt-file";
 
+const MODEL_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/** In-memory cache of model lists per provider, with a TTL of 1 hour. */
+export class ModelCache {
+  private cache = new Map<string, { models: string[]; fetchedAt: number }>();
+
+  /**
+   * Return cached models for `key` if still fresh, or `null` if missing/stale.
+   *
+   * @param key - Provider identifier.
+   */
+  get(key: string): string[] | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.fetchedAt > MODEL_CACHE_TTL_MS) {
+      this.cache.delete(key);
+      return null;
+    }
+    return entry.models;
+  }
+
+  /**
+   * Store a model list for `key`, resetting the TTL.
+   *
+   * @param key - Provider identifier.
+   * @param models - Model list to cache.
+   */
+  set(key: string, models: string[]): void {
+    this.cache.set(key, { models, fetchedAt: Date.now() });
+  }
+
+  /** Invalidate the cached list for `key`, forcing a fresh fetch next time. */
+  invalidate(key: string): void {
+    this.cache.delete(key);
+  }
+}
+
 /** Main plugin class — registered as the entry point in `manifest.json`. */
 export default class writebraightPlugin extends Plugin {
   settings: PluginSettings = DEFAULT_SETTINGS;
+  /** Shared in-memory model cache, lives for the duration of the Obsidian session. */
+  readonly modelCache = new ModelCache();
 
   /** Called by Obsidian when the plugin is enabled. Registers all commands and UI elements. */
   async onload(): Promise<void> {
@@ -289,7 +328,13 @@ export default class writebraightPlugin extends Plugin {
       getItems(): string[] { return providers; }
       getItemText(item: string): string { return item; }
       onChooseItem(provider: string): void {
+        // Cache current model for the outgoing provider
+        if (!settings.modelPerProvider) settings.modelPerProvider = {};
+        settings.modelPerProvider[settings.provider] = settings.model;
         settings.provider = provider as typeof settings.provider;
+        // Restore last-used model for the new provider, or fall back to default
+        settings.model = settings.modelPerProvider[settings.provider] ?? PROVIDER_DEFAULT_MODELS[settings.provider];
+        plugin.saveSettings();
         // Show model picker for selected provider
         plugin.showModelPicker();
       }
@@ -302,30 +347,35 @@ export default class writebraightPlugin extends Plugin {
    * Defaults to the currently selected model.
    */
   private async showModelPicker(): Promise<void> {
-    const provider = createProvider(this.settings);
     const app = this.app;
     const plugin = this;
 
-    const notice = new Notice("Loading models…", 0);
-    let models: string[] = [];
-    try {
-      models = await provider.listModels();
-    } catch {
-      // Fall back to empty list
+    let models = this.modelCache.get(this.settings.provider);
+    if (!models) {
+      const notice = new Notice("Loading models…", 0);
+      try {
+        models = await createProvider(this.settings).listModels();
+        this.modelCache.set(this.settings.provider, models);
+      } catch {
+        models = [];
+      }
+      notice.hide();
     }
-    notice.hide();
 
-    if (models.length === 0) {
+    const modelList = models ?? [];
+    if (modelList.length === 0) {
       new Notice("Could not fetch models. Check your API key.", 5000);
       return;
     }
 
     class ModelPicker extends FuzzySuggestModal<string> {
       constructor() { super(app); }
-      getItems(): string[] { return models; }
+      getItems(): string[] { return modelList; }
       getItemText(item: string): string { return item; }
       onChooseItem(model: string): void {
         plugin.settings.model = model;
+        if (!plugin.settings.modelPerProvider) plugin.settings.modelPerProvider = {};
+        plugin.settings.modelPerProvider[plugin.settings.provider] = model;
         plugin.saveSettings();
         new Notice(`Model set to ${model}`, 2000);
       }

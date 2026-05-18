@@ -58,8 +58,12 @@ export class writebraightSettingTab extends PluginSettingTab {
         PROVIDERS.forEach(({ value, label }) => drop.addOption(value, label));
         drop.setValue(s.provider);
         drop.onChange(async (value) => {
+          // Save current model for the outgoing provider
+          if (!s.modelPerProvider) s.modelPerProvider = {};
+          s.modelPerProvider[s.provider] = s.model;
           s.provider = value as ProviderType;
-          s.model = PROVIDER_DEFAULT_MODELS[s.provider];
+          // Restore last-used model for the new provider, or fall back to default
+          s.model = s.modelPerProvider[s.provider] ?? PROVIDER_DEFAULT_MODELS[s.provider];
           await this.plugin.saveSettings();
           this.display();
         });
@@ -150,10 +154,18 @@ export class writebraightSettingTab extends PluginSettingTab {
       drop.onChange(async (value) => {
         if (value) {
           s.model = value;
+          if (!s.modelPerProvider) s.modelPerProvider = {};
+          s.modelPerProvider[s.provider] = value;
           await this.plugin.saveSettings();
         }
       });
     });
+
+    const fetchAndCache = async (): Promise<string[]> => {
+      const fetched = await createProvider(s).listModels();
+      this.plugin.modelCache.set(s.provider, fetched);
+      return fetched;
+    };
 
     modelSetting.addButton((btn) => {
       btn.setButtonText("Refresh");
@@ -161,9 +173,9 @@ export class writebraightSettingTab extends PluginSettingTab {
       btn.onClick(async () => {
         btn.setDisabled(true);
         btn.setButtonText("Loading…");
+        this.plugin.modelCache.invalidate(s.provider);
         try {
-          const fetched = await createProvider(s).listModels();
-          populateDropdown(fetched);
+          populateDropdown(await fetchAndCache());
         } catch {
           populateDropdown([]);
         }
@@ -172,14 +184,18 @@ export class writebraightSettingTab extends PluginSettingTab {
       });
     });
 
-    // Load models if key is present
+    // Load models if key is present — use cache if available
     if (hasKey) {
-      modelSetting.setDesc("Loading models…");
-      try {
-        const fetched = await createProvider(s).listModels();
-        populateDropdown(fetched);
-      } catch {
-        populateDropdown([]);
+      const cached = this.plugin.modelCache.get(s.provider);
+      if (cached) {
+        populateDropdown(cached);
+      } else {
+        modelSetting.setDesc("Loading models…");
+        try {
+          populateDropdown(await fetchAndCache());
+        } catch {
+          populateDropdown([]);
+        }
       }
     } else {
       modelSetting.setDesc("Enter your API key above to load available models.");
