@@ -24,14 +24,14 @@ It supports **six providers** and three distinct **modes of action**.
 
 ## Supported Providers
 
-| Provider | Notes |
-|---|---|
-| **OpenAI** | Requires an API key. |
-| **Anthropic** | Requires an API key. |
-| **Google** | Requires an API key (Gemini). |
-| **Mistral** | Requires an API key. |
-| **Ollama** | Local server — no API key needed. Configure the base URL. |
-| **OpenRouter** | Single key that routes to many models. |
+| Provider       | Notes                                                     |
+|----------------|-----------------------------------------------------------|
+| **OpenAI**     | Requires an API key.                                      |
+| **Anthropic**  | Requires an API key.                                      |
+| **Google**     | Requires an API key (Gemini).                             |
+| **Mistral**    | Requires an API key.                                      |
+| **Ollama**     | Local server — no API key needed. Configure the base URL. |
+| **OpenRouter** | Single key that routes to many models.                    |
 
 ---
 
@@ -41,22 +41,23 @@ Open **Settings → Elf**.
 
 1. Select a **Provider** and enter your **API key** (or Ollama base URL).
 2. Models load automatically — pick from the dropdown or click **Refresh**.
-3. Under **Default Prompts**, choose which prompt is used for each mode's default command.
-4. Under **Prompt Library**, set the path to your `prompts.md` file and edit prompts inline.
+3. Set **Variations count** (1–10, default 3) — how many alternatives are generated each time.
+4. Under **Default Prompts**, choose which prompt is used for each mode's default command.
+5. Under **Prompt Library**, set the path to your `prompts.md` file and edit prompts inline.
 
 ---
 
 ## Commands
 
-| Command | Hotkey | Description |
-|---|---|---|
-| Collaborate: continue writing | `⌘⇧C` | Inserts AI continuation after the cursor |
-| Rewrite: rewrite selection | `⌘⇧R` | Replaces selection with AI rewrite |
-| Variations: generate variations | `⌘⇧V` | Opens variations modal |
-| Collaborate: pick a prompt… | — | Fuzzy-pick a Collaborate prompt |
-| Rewrite: pick a prompt… | — | Fuzzy-pick a Rewrite prompt |
-| Variations: pick a prompt… | — | Fuzzy-pick a Variations prompt |
-| Select provider and model… | — | Switch provider and model |
+| Command                         | Hotkey | Description                              |
+|---------------------------------|--------|------------------------------------------|
+| Collaborate: continue writing   | `⌘⇧C`  | Inserts AI continuation after the cursor |
+| Rewrite: rewrite selection      | `⌘⇧R`  | Replaces selection with AI rewrite       |
+| Variations: generate variations | `⌘⇧V`  | Opens variations modal                   |
+| Collaborate: pick a prompt…     | —      | Fuzzy-pick a Collaborate prompt          |
+| Rewrite: pick a prompt…         | —      | Fuzzy-pick a Rewrite prompt              |
+| Variations: pick a prompt…      | —      | Fuzzy-pick a Variations prompt           |
+| Select provider and model…      | —      | Switch provider and model                |
 
 ### Variations modal
 
@@ -75,13 +76,13 @@ Right-click selected text to access **Rewrite with AI**, **Rewrite with AI…**,
 
 Prompts use `{{placeholder}}` variables:
 
-| Placeholder | Available in | Description |
-|---|---|---|
-| `{{context}}` | Collaborate | Paragraph text up to the cursor |
-| `{{selected}}` | Rewrite, Variations | Currently selected text |
-| `{{before}}` | Rewrite, Variations | Up to 500 characters before the selection |
-| `{{after}}` | Rewrite, Variations | Up to 500 characters after the selection |
-| `{{n}}` | Variations | Number of variations to generate |
+| Placeholder    | Available in        | Description                               |
+|----------------|---------------------|-------------------------------------------|
+| `{{context}}`  | Collaborate         | Paragraph text up to the cursor           |
+| `{{selected}}` | Rewrite, Variations | Currently selected text                   |
+| `{{before}}`   | Rewrite, Variations | Up to 500 characters before the selection |
+| `{{after}}`    | Rewrite, Variations | Up to 500 characters after the selection  |
+| `{{n}}`        | Variations          | Number of variations to generate          |
 
 ---
 
