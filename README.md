@@ -9,8 +9,6 @@ Elf is an [Obsidian](https://obsidian.md) plugin that brings AI writing assistan
 It supports **six providers** and three distinct **modes of action**.
 </center>
 
----
-
 ## Features
 
 - **Collaborate** — the AI continues your current paragraph from the cursor position.
@@ -19,8 +17,6 @@ It supports **six providers** and three distinct **modes of action**.
 - **Prompt library** — create and edit prompts for each mode, stored in a `prompts.md` file in your vault.
 - **Command palette** commands with default hotkeys.
 - **Right-click context menu** when text is selected.
-
----
 
 ## Supported Providers
 
@@ -33,8 +29,6 @@ It supports **six providers** and three distinct **modes of action**.
 | **Ollama**     | Local server — no API key needed. Configure the base URL. |
 | **OpenRouter** | Single key that routes to many models.                    |
 
----
-
 ## Configuration
 
 Open **Settings → Elf**.
@@ -44,8 +38,6 @@ Open **Settings → Elf**.
 3. Set **Variations count** (1–10, default 3) — how many alternatives are generated each time.
 4. Under **Default Prompts**, choose which prompt is used for each mode's default command.
 5. Under **Prompt Library**, set the path to your `prompts.md` file and edit prompts inline.
-
----
 
 ## Commands
 
@@ -70,31 +62,16 @@ Open **Settings → Elf**.
 
 Right-click selected text to access **Rewrite with AI**, **Rewrite with AI…**, and **Generate variations…**.
 
----
-
 ## Prompt Templates
 
 Prompts use `{{placeholder}}` variables:
 
-| Placeholder    | Available in        | Description                               |
-|----------------|---------------------|-------------------------------------------|
-| `{{context}}`  | Collaborate         | Paragraph text up to the cursor           |
-| `{{selected}}` | Rewrite, Variations | Currently selected text                   |
-| `{{before}}`   | Rewrite, Variations | Up to 500 characters before the selection |
-| `{{after}}`    | Rewrite, Variations | Up to 500 characters after the selection  |
-| `{{n}}`        | Variations          | Number of variations to generate          |
-
----
-
-## License
-
-MIT
-
-## Disclaimer
-
-This was written, in great part, with recourse to generative AI. In particular, I made use of a mixture of models within Windsurf to make a large part of this happen.
-
----
+| Placeholder    | Available in        | Description                                                                                             |
+|----------------|---------------------|---------------------------------------------------------------------------------------------------------|
+| `{{before}}`   | All modes           | Collaborate: paragraph up to the cursor. Rewrite/Variations: up to 500 characters before the selection. |
+| `{{after}}`    | Rewrite, Variations | Up to 500 characters after the selection                                                                |
+| `{{selected}}` | Rewrite, Variations | The currently selected text                                                                             |
+| `{{n}}`        | Variations          | Number of variations to generate                                                                        |
 
 ## Developing
 
@@ -167,3 +144,11 @@ Unit tests run without API keys. Integration tests are skipped automatically whe
 cp .env.example .env
 npm test
 ```
+
+## License
+
+MIT
+
+## Disclaimer
+
+This was written, in great part, with recourse to generative AI. In particular, I made use of a mixture of models within Windsurf to make a large part of this happen.
