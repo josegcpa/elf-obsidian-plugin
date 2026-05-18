@@ -41,6 +41,7 @@ export class writebraightSettingTab extends PluginSettingTab {
     this.renderProviderSection(containerEl, s, modelSectionEl);
     containerEl.appendChild(modelSectionEl);
     void this.renderModelSection(modelSectionEl, s);
+    this.renderVariationsSection(containerEl, s);
     this.renderDefaultPromptsSection(containerEl, s);
     this.renderPromptLibrarySection(containerEl, s);
   }
@@ -200,6 +201,23 @@ export class writebraightSettingTab extends PluginSettingTab {
     } else {
       modelSetting.setDesc("Enter your API key above to load available models.");
     }
+  }
+
+  /** Render the Variations count setting. */
+  private renderVariationsSection(el: HTMLElement, s: PluginSettings): void {
+    new Setting(el)
+      .setName("Variations count")
+      .setDesc("Number of variations generated in Variations mode.")
+      .addSlider((slider) => {
+        slider
+          .setLimits(1, 10, 1)
+          .setValue(s.variationCount ?? 3)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            s.variationCount = value;
+            await this.plugin.saveSettings();
+          });
+      });
   }
 
   /** Render dropdowns for the default Collaborate, Rewrite, and Variations prompts. */

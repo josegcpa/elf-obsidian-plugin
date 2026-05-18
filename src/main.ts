@@ -390,7 +390,7 @@ export default class writebraightPlugin extends Plugin {
    * @param prompt - Prompt whose `mode` must be `"variations"`.
    */
   private openVariationsModal(editor: Editor, prompt: Prompt): void {
-    new VariationsModal(this.app, editor, createProvider(this.settings), prompt, 3).open();
+    new VariationsModal(this.app, editor, createProvider(this.settings), prompt, this.settings.variationCount).open();
   }
 
   /**

@@ -55,6 +55,8 @@ export interface PluginSettings {
   prompts: Prompt[];
   /** Vault-relative path to the prompts markdown file. */
   promptsFilePath: string;
+  /** How many variations to generate in Variations mode. */
+  variationCount: number;
 }
 
 /** Payload sent to any `LLMProvider.complete` call. */
@@ -134,4 +136,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   defaultVariationsPromptId: "variations-default",
   prompts: DEFAULT_PROMPTS,
   promptsFilePath: "prompts.md",
+  variationCount: 3,
 };
