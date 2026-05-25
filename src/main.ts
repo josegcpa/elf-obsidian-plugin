@@ -67,7 +67,9 @@ export default class writebraightPlugin extends Plugin {
     this.app.workspace.onLayoutReady(async () => {
       const target = this.settings.promptsFilePath || PROMPTS_FILE_PATH;
       try {
-        this.settings.prompts = await loadPromptsFile(this.app, target);
+        const loaded = await loadPromptsFile(this.app, target);
+        this.settings.prompts = loaded.prompts;
+        this.settings.defaultSystemPrompts = loaded.defaultSystemPrompts;
       } catch (e) {
         console.error("Elf: failed to load prompts file", e);
       }
@@ -77,7 +79,9 @@ export default class writebraightPlugin extends Plugin {
           const t = this.settings.promptsFilePath || PROMPTS_FILE_PATH;
           if (file.path === t) {
             try {
-              this.settings.prompts = await loadPromptsFile(this.app, t);
+              const reloaded = await loadPromptsFile(this.app, t);
+              this.settings.prompts = reloaded.prompts;
+              this.settings.defaultSystemPrompts = reloaded.defaultSystemPrompts;
             } catch (e) {
               console.error("Elf: failed to reload prompts file", e);
             }
@@ -241,6 +245,7 @@ export default class writebraightPlugin extends Plugin {
     await savePromptsFile(
       this.app,
       this.settings.prompts,
+      this.settings.defaultSystemPrompts,
       this.settings.promptsFilePath || PROMPTS_FILE_PATH
     );
     const { prompts: _prompts, ...rest } = this.settings;
@@ -390,7 +395,7 @@ export default class writebraightPlugin extends Plugin {
    * @param prompt - Prompt whose `mode` must be `"variations"`.
    */
   private openVariationsModal(editor: Editor, prompt: Prompt): void {
-    new VariationsModal(this.app, editor, createProvider(this.settings), prompt, this.settings.variationCount).open();
+    new VariationsModal(this.app, editor, createProvider(this.settings), prompt, this.settings.variationCount, this.settings.defaultSystemPrompts).open();
   }
 
   /**
@@ -412,8 +417,8 @@ export default class writebraightPlugin extends Plugin {
     };
     const [startMsg, endMsg] = labels[mode];
     const run = mode === "collaborate"
-      ? () => runCollaborate(editor, createProvider(this.settings), prompt, this.app)
-      : () => runRewrite(editor, createProvider(this.settings), prompt, this.app);
+      ? () => runCollaborate(editor, createProvider(this.settings), prompt, this.app, this.settings.defaultSystemPrompts)
+      : () => runRewrite(editor, createProvider(this.settings), prompt, this.app, this.settings.defaultSystemPrompts);
     await this.runWithNotice(run, startMsg, endMsg);
   }
 

@@ -1,10 +1,24 @@
 import { App, Editor } from "obsidian";
 import { LLMProvider } from "./providers/base";
-import { Prompt } from "./types";
+import { DefaultSystemPrompts, Prompt } from "./types";
 import { resolveFileLinks } from "./file-resolver";
 
 /** Default number of variations to request when `{{n}}` is used. */
 const DEFAULT_VARIATION_COUNT = 3;
+
+/**
+ * Return the prompt's own system prompt, or the mode-level default if empty.
+ *
+ * @param prompt - The active prompt.
+ * @param defaults - Per-mode default system prompts from settings.
+ * @returns The system prompt string to send to the model.
+ */
+export function resolveSystemPrompt(
+  prompt: Prompt,
+  defaults: DefaultSystemPrompts
+): string {
+  return prompt.systemPrompt.trim() || defaults[prompt.mode];
+}
 
 /** Maximum characters of surrounding context sent with rewrite/variations prompts. */
 const CONTEXT_WINDOW_CHARS = 500;
@@ -90,14 +104,15 @@ export async function runCollaborate(
   editor: Editor,
   provider: LLMProvider,
   prompt: Prompt,
-  app: App
+  app: App,
+  defaultSystemPrompts: DefaultSystemPrompts
 ): Promise<void> {
   const before = getParagraphContext(editor);
   const resolvedTemplate = await resolveFileLinks(prompt.userPromptTemplate, app);
   const userPrompt = renderTemplate(resolvedTemplate, { before });
 
   const response = await provider.complete({
-    systemPrompt: prompt.systemPrompt,
+    systemPrompt: resolveSystemPrompt(prompt, defaultSystemPrompts),
     userPrompt,
   });
 
@@ -122,7 +137,8 @@ export async function runRewrite(
   editor: Editor,
   provider: LLMProvider,
   prompt: Prompt,
-  app: App
+  app: App,
+  defaultSystemPrompts: DefaultSystemPrompts
 ): Promise<void> {
   const selected = editor.getSelection();
   if (!selected) {
@@ -138,7 +154,7 @@ export async function runRewrite(
   });
 
   const response = await provider.complete({
-    systemPrompt: prompt.systemPrompt,
+    systemPrompt: resolveSystemPrompt(prompt, defaultSystemPrompts),
     userPrompt,
   });
 
@@ -166,6 +182,7 @@ export async function runVariations(
   provider: LLMProvider,
   prompt: Prompt,
   app: App,
+  defaultSystemPrompts: DefaultSystemPrompts,
   count = DEFAULT_VARIATION_COUNT
 ): Promise<string[]> {
   const selected = editor.getSelection();
@@ -175,7 +192,7 @@ export async function runVariations(
 
   const { before, after } = getSelectionContext(editor);
   const n = String(count);
-  const systemPrompt = renderTemplate(prompt.systemPrompt, { n });
+  const systemPrompt = renderTemplate(resolveSystemPrompt(prompt, defaultSystemPrompts), { n });
   const resolvedTemplate = await resolveFileLinks(prompt.userPromptTemplate, app);
   const userPrompt = renderTemplate(resolvedTemplate, {
     selected,

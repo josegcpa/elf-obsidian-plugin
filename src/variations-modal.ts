@@ -1,6 +1,6 @@
 import { App, Editor, Modal, Notice } from "obsidian";
 import { LLMProvider } from "./providers/base";
-import { Prompt } from "./types";
+import { DefaultSystemPrompts, Prompt } from "./types";
 import { runVariations } from "./engine";
 
 /**
@@ -25,7 +25,8 @@ export class VariationsModal extends Modal {
     private readonly editor: Editor,
     private readonly provider: LLMProvider,
     private readonly prompt: Prompt,
-    private readonly count: number
+    private readonly count: number,
+    private readonly defaultSystemPrompts: DefaultSystemPrompts
   ) {
     super(app);
   }
@@ -77,6 +78,7 @@ export class VariationsModal extends Modal {
         this.provider,
         this.prompt,
         this.app,
+        this.defaultSystemPrompts,
         this.count
       );
 
