@@ -68,10 +68,9 @@ export function serialisePrompts(
   const yamlValue = (s: string) => JSON.stringify(s);
   const frontMatter = [
     "---",
-    "default_system_prompts:",
-    `  collaborate: ${yamlValue(defaultSystemPrompts.collaborate)}`,
-    `  rewrite: ${yamlValue(defaultSystemPrompts.rewrite)}`,
-    `  variations: ${yamlValue(defaultSystemPrompts.variations)}`,
+    `default_system_prompt_collaborate: ${yamlValue(defaultSystemPrompts.collaborate)}`,
+    `default_system_prompt_rewrite: ${yamlValue(defaultSystemPrompts.rewrite)}`,
+    `default_system_prompt_variations: ${yamlValue(defaultSystemPrompts.variations)}`,
     "---",
     "",
     "<!-- Elf prompt library — edit freely, the plugin will reload on save -->",
@@ -118,17 +117,19 @@ function extractFrontMatter(content: string): string | null {
  */
 function parseFrontMatterSystemPrompts(yaml: string): DefaultSystemPrompts {
   const result = { ...DEFAULT_SYSTEM_PROMPTS };
-  const section = yaml.match(/default_system_prompts:[\s\S]*?(?=\n\S|$)/);
-  if (!section) return result;
-
-  for (const key of ["collaborate", "rewrite", "variations"] as const) {
-    const re = new RegExp(`^\\s+${key}:\\s*(['"])([\\s\\S]*?)\\1\\s*$`, "m");
-    const m = section[0].match(re);
+  const mapping: Record<string, keyof DefaultSystemPrompts> = {
+    default_system_prompt_collaborate: "collaborate",
+    default_system_prompt_rewrite: "rewrite",
+    default_system_prompt_variations: "variations",
+  };
+  for (const [flatKey, modeKey] of Object.entries(mapping)) {
+    const re = new RegExp(`^${flatKey}:\\s*(['"])([\\s\\S]*?)\\1\\s*$`, "m");
+    const m = yaml.match(re);
     if (m) {
       try {
-        result[key] = JSON.parse(`"${m[2].replace(/"/g, '\\"').replace(/\\'/g, "'")}"`);
+        result[modeKey] = JSON.parse(`"${m[2].replace(/"/g, '\\"').replace(/\\'/g, "'")}"`);
       } catch {
-        result[key] = m[2];
+        result[modeKey] = m[2];
       }
     }
   }

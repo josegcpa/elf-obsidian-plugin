@@ -93,13 +93,12 @@ describe("serialisePrompts / parsePrompts round-trip", () => {
     expect(serialised).toContain("You are a pirate editor.");
   });
 
-  it("embeds default_system_prompts in YAML front-matter", () => {
+  it("embeds default system prompts as flat YAML properties", () => {
     const serialised = serialisePrompts(prompts);
     expect(serialised).toMatch(/^---\n/);
-    expect(serialised).toContain("default_system_prompts:");
-    expect(serialised).toContain("collaborate:");
-    expect(serialised).toContain("rewrite:");
-    expect(serialised).toContain("variations:");
+    expect(serialised).toContain("default_system_prompt_collaborate:");
+    expect(serialised).toContain("default_system_prompt_rewrite:");
+    expect(serialised).toContain("default_system_prompt_variations:");
   });
 
   it("round-trips custom default system prompts", () => {

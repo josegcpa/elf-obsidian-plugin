@@ -40,13 +40,13 @@ export class VariationsModal extends Modal {
     this.listEl = this.contentEl.createDiv({ cls: "wr-variations-list" });
 
     const hint = this.contentEl.createDiv({ cls: "wr-variations-hint" });
-    hint.setText("↑↓ navigate · Enter accept · Shift+Enter regenerate · Ctrl+A copy all · Esc cancel");
-
-    const copyAllBtn = this.contentEl.createEl("button", {
-      cls: "wr-variations-copy-all",
-      text: "Copy all",
-    });
-    copyAllBtn.addEventListener("click", () => this.copyAll());
+    hint.innerHTML = [
+      "<code>↑↓</code><br>navigate", 
+      "<code>↵</code><br>accept", 
+      "<code>Shift + ↵</code><br>regenerate", 
+      "<code>Ctrl/⌘ + A</code><br>copy all", 
+      "<code>Esc</code><br>cancel"
+    ].map((item) => `<div>${item}</div>`).join("");
 
     this.modalEl.tabIndex = 0;
     this.modalEl.addEventListener("keydown", this.onKeyDown.bind(this));

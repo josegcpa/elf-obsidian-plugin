@@ -24,6 +24,7 @@ export class OpenAIProvider implements LLMProvider {
           { role: "user", content: request.userPrompt },
         ],
         max_tokens: request.maxTokens ?? 1024,
+        temperature: request.temperature ?? 0.7,
       },
       "OpenAI API error"
     )) as { choices: { message: { content: string } }[] };

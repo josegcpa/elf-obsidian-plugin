@@ -24,7 +24,10 @@ export class GoogleProvider implements LLMProvider {
       {
         system_instruction: { parts: [{ text: request.systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: request.userPrompt }] }],
-        generationConfig: { maxOutputTokens: request.maxTokens ?? 1024 },
+        generationConfig: {
+          maxOutputTokens: request.maxTokens ?? 1024,
+          temperature: request.temperature ?? 0.7,
+        },
       },
       "Google API error"
     )) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };

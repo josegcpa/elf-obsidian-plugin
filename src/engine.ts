@@ -205,6 +205,7 @@ export async function runVariations(
     systemPrompt,
     userPrompt,
     maxTokens: 1024 * Math.ceil(count / 2),
+    temperature: 0.9,
   });
 
   return parseVariations(response.text);

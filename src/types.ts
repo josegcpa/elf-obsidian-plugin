@@ -81,6 +81,8 @@ export interface LLMRequest {
   userPrompt: string;
   /** Maximum number of tokens to generate (default: 1024). */
   maxTokens?: number;
+  /** Sampling temperature (0–2). Higher = more varied output. */
+  temperature?: number;
 }
 
 /** Value returned by any `LLMProvider.complete` call. */

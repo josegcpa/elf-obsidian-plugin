@@ -23,7 +23,10 @@ export class OllamaProvider implements LLMProvider {
           { role: "system", content: request.systemPrompt },
           { role: "user", content: request.userPrompt },
         ],
-        options: { num_predict: request.maxTokens ?? 1024 },
+        options: {
+          num_predict: request.maxTokens ?? 1024,
+          temperature: request.temperature ?? 0.7,
+        },
       },
       "Ollama API error"
     )) as { message?: { content?: string } };

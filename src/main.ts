@@ -70,6 +70,7 @@ export default class writebraightPlugin extends Plugin {
         const loaded = await loadPromptsFile(this.app, target);
         this.settings.prompts = loaded.prompts;
         this.settings.defaultSystemPrompts = loaded.defaultSystemPrompts;
+        this.reconcileDefaultPromptIds();
       } catch (e) {
         console.error("Elf: failed to load prompts file", e);
       }
@@ -82,6 +83,7 @@ export default class writebraightPlugin extends Plugin {
               const reloaded = await loadPromptsFile(this.app, t);
               this.settings.prompts = reloaded.prompts;
               this.settings.defaultSystemPrompts = reloaded.defaultSystemPrompts;
+              this.reconcileDefaultPromptIds();
             } catch (e) {
               console.error("Elf: failed to reload prompts file", e);
             }
@@ -253,42 +255,67 @@ export default class writebraightPlugin extends Plugin {
   }
 
   /**
+   * After (re)loading prompts, reset any stored default prompt ID that no
+   * longer exists to the first available prompt of that mode.
+   * This handles migrations where prompt IDs have changed.
+   */
+  private reconcileDefaultPromptIds(): void {
+    const ids = (mode: ModeType) =>
+      this.settings.prompts.filter((p) => p.mode === mode).map((p) => p.id);
+
+    const fix = (
+      current: string,
+      mode: ModeType,
+      setter: (id: string) => void
+    ) => {
+      const available = ids(mode);
+      if (!available.includes(current) && available.length > 0) {
+        setter(available[0]);
+      }
+    };
+
+    fix(this.settings.defaultCollaboratePromptId, "collaborate",
+      (id) => { this.settings.defaultCollaboratePromptId = id; });
+    fix(this.settings.defaultRewritePromptId, "rewrite",
+      (id) => { this.settings.defaultRewritePromptId = id; });
+    fix(this.settings.defaultVariationsPromptId, "variations",
+      (id) => { this.settings.defaultVariationsPromptId = id; });
+  }
+
+  /**
    * Look up the default Collaborate prompt from the library.
-   *
-   * @throws If the configured default ID no longer exists in the library.
+   * Falls back to the first collaborate prompt if the stored ID is missing.
    */
   private getDefaultCollaboratePrompt(): Prompt {
-    const prompt = this.settings.prompts.find(
-      (p) => p.id === this.settings.defaultCollaboratePromptId
+    return (
+      this.settings.prompts.find((p) => p.id === this.settings.defaultCollaboratePromptId) ??
+      this.settings.prompts.find((p) => p.mode === "collaborate") ??
+      (() => { throw new Error("No collaborate prompts found."); })()
     );
-    if (!prompt) throw new Error("Default collaborate prompt not found.");
-    return prompt;
   }
 
   /**
    * Look up the default Variations prompt from the library.
-   *
-   * @throws If the configured default ID no longer exists in the library.
+   * Falls back to the first variations prompt if the stored ID is missing.
    */
   private getDefaultVariationsPrompt(): Prompt {
-    const prompt = this.settings.prompts.find(
-      (p) => p.id === this.settings.defaultVariationsPromptId
+    return (
+      this.settings.prompts.find((p) => p.id === this.settings.defaultVariationsPromptId) ??
+      this.settings.prompts.find((p) => p.mode === "variations") ??
+      (() => { throw new Error("No variations prompts found."); })()
     );
-    if (!prompt) throw new Error("Default variations prompt not found.");
-    return prompt;
   }
 
   /**
    * Look up the default Rewrite prompt from the library.
-   *
-   * @throws If the configured default ID no longer exists in the library.
+   * Falls back to the first rewrite prompt if the stored ID is missing.
    */
   private getDefaultRewritePrompt(): Prompt {
-    const prompt = this.settings.prompts.find(
-      (p) => p.id === this.settings.defaultRewritePromptId
+    return (
+      this.settings.prompts.find((p) => p.id === this.settings.defaultRewritePromptId) ??
+      this.settings.prompts.find((p) => p.mode === "rewrite") ??
+      (() => { throw new Error("No rewrite prompts found."); })()
     );
-    if (!prompt) throw new Error("Default rewrite prompt not found.");
-    return prompt;
   }
 
   /**
