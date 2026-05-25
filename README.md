@@ -13,8 +13,10 @@ It supports **six providers** and three distinct **modes of action**.
 
 - **Collaborate** — the AI continues your current paragraph from the cursor position.
 - **Rewrite** — the AI rewrites selected text in place, using surrounding context so the result fits seamlessly into the document.
-- **Variations** — the AI generates multiple alternative rewrites of the selection; a modal lets you preview, accept, or regenerate.
+- **Variations** — the AI generates multiple alternative rewrites of the selection; a modal lets you preview, accept, copy all, or regenerate.
 - **Prompt library** — create and edit prompts for each mode, stored in a `prompts.md` file in your vault.
+- **File link resolution** — embed `[[wikilinks]]` in any prompt template; the linked file's contents are appended to the user message automatically.
+- **Dataview integration** — `dataview` and `dataviewjs` code blocks inside linked files are rendered to markdown tables before being sent to the model.
 - **Command palette** commands with default hotkeys.
 - **Right-click context menu** when text is selected.
 
@@ -41,21 +43,22 @@ Open **Settings → Elf**.
 
 ## Commands
 
-| Command                         | Hotkey | Description                              |
-|---------------------------------|--------|------------------------------------------|
-| Collaborate: continue writing   | `⌘⇧C`  | Inserts AI continuation after the cursor |
-| Rewrite: rewrite selection      | `⌘⇧R`  | Replaces selection with AI rewrite       |
-| Variations: generate variations | `⌘⇧V`  | Opens variations modal                   |
-| Collaborate: pick a prompt…     | —      | Fuzzy-pick a Collaborate prompt          |
-| Rewrite: pick a prompt…         | —      | Fuzzy-pick a Rewrite prompt              |
-| Variations: pick a prompt…      | —      | Fuzzy-pick a Variations prompt           |
-| Select provider and model…      | —      | Switch provider and model                |
+| Command                         | Hotkey     | Description                              |
+|---------------------------------|------------|------------------------------------------|
+| Collaborate: continue writing   | `Ctrl/⌘⇧C` | Inserts AI continuation after the cursor |
+| Rewrite: rewrite selection      | `Ctrl/⌘⇧R` | Replaces selection with AI rewrite       |
+| Variations: generate variations | `Ctrl/⌘⇧V` | Opens variations modal                   |
+| Collaborate: pick a prompt…     | —          | Fuzzy-pick a Collaborate prompt          |
+| Rewrite: pick a prompt…         | —          | Fuzzy-pick a Rewrite prompt              |
+| Variations: pick a prompt…      | —          | Fuzzy-pick a Variations prompt           |
+| Select provider and model…      | —          | Switch provider and model                |
 
 ### Variations modal
 
 - `↑` / `↓` or mouse — navigate options.
 - `Enter` — accept highlighted variation.
 - `Shift+Enter` — regenerate a new batch.
+- `Ctrl/⌘+A` — copy all variations to the clipboard (numbered list).
 - `Esc` — cancel.
 
 ### Right-click menu
@@ -72,6 +75,29 @@ Prompts use `{{placeholder}}` variables:
 | `{{after}}`    | Rewrite, Variations | Up to 500 characters after the selection                                                                |
 | `{{selected}}` | Rewrite, Variations | The currently selected text                                                                             |
 | `{{n}}`        | Variations          | Number of variations to generate                                                                        |
+
+### File links
+
+Any `[[wikilink]]` in a prompt template is resolved before the prompt is sent:
+
+1. The link is replaced inline with `[FILE: path/to/file.md]`.
+2. The file's contents are appended at the end of the user message under `[CONTENTS OF FILE: path/to/file.md]`.
+3. `dataview` / `dataviewjs` blocks inside the linked file are rendered via the Dataview plugin API (if installed).
+4. Wikilinks inside linked files are resolved recursively; circular references are safely deduplicated.
+
+### Default system prompts
+
+Each mode has a default system prompt stored as YAML front-matter in `prompts.md`:
+
+```yaml
+---
+default_system_prompt_collaborate: "..."
+default_system_prompt_rewrite: "..."
+default_system_prompt_variations: "..."
+---
+```
+
+Individual prompts can override this by including a `### System prompt` section. If the section is absent, the mode default is used.
 
 ## Developing
 
@@ -104,7 +130,8 @@ src/
 ├── main.ts                    # Plugin entry point
 ├── types.ts                   # Shared types and default values
 ├── engine.ts                  # Collaborate, Rewrite & Variations logic
-├── prompt-file.ts             # Prompt library management
+├── file-resolver.ts           # [[wikilink]] and Dataview block resolution
+├── prompt-file.ts             # Prompt library serialisation / parsing
 ├── settings-tab.ts            # Settings UI
 ├── variations-modal.ts        # Variations navigation modal
 ├── providers/
@@ -121,6 +148,8 @@ src/
     │   └── obsidian.ts
     ├── setup.ts
     ├── engine.test.ts
+    ├── file-resolver.test.ts
+    ├── prompt-file.test.ts
     └── providers.test.ts
 ```
 
