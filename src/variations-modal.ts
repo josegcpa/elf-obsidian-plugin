@@ -39,7 +39,13 @@ export class VariationsModal extends Modal {
     this.listEl = this.contentEl.createDiv({ cls: "wr-variations-list" });
 
     const hint = this.contentEl.createDiv({ cls: "wr-variations-hint" });
-    hint.setText("↑↓ navigate · Enter accept · Shift+Enter regenerate · Esc cancel");
+    hint.setText("↑↓ navigate · Enter accept · Shift+Enter regenerate · Ctrl+A copy all · Esc cancel");
+
+    const copyAllBtn = this.contentEl.createEl("button", {
+      cls: "wr-variations-copy-all",
+      text: "Copy all",
+    });
+    copyAllBtn.addEventListener("click", () => this.copyAll());
 
     this.modalEl.tabIndex = 0;
     this.modalEl.addEventListener("keydown", this.onKeyDown.bind(this));
@@ -70,6 +76,7 @@ export class VariationsModal extends Modal {
         this.editor,
         this.provider,
         this.prompt,
+        this.app,
         this.count
       );
 
@@ -127,6 +134,18 @@ export class VariationsModal extends Modal {
     });
   }
 
+  /** Copy all variations to the clipboard as a numbered list. */
+  private copyAll(): void {
+    if (this.variations.length === 0) return;
+    const text = this.variations
+      .map((v, i) => `${i + 1}. ${v}`)
+      .join("\n\n");
+    navigator.clipboard.writeText(text).then(
+      () => new Notice("All variations copied.", 2000),
+      () => new Notice("Failed to copy to clipboard.", 3000)
+    );
+  }
+
   /** Replace the editor selection with the currently highlighted variation. */
   private accept(): void {
     const text = this.variations[this.selectedIndex];
@@ -162,6 +181,13 @@ export class VariationsModal extends Modal {
           this.generate();
         } else {
           this.accept();
+        }
+        break;
+
+      case "a":
+        if (evt.ctrlKey || evt.metaKey) {
+          evt.preventDefault();
+          this.copyAll();
         }
         break;
 

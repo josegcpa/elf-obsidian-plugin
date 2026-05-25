@@ -1,6 +1,7 @@
-import { Editor } from "obsidian";
+import { App, Editor } from "obsidian";
 import { LLMProvider } from "./providers/base";
 import { Prompt } from "./types";
+import { resolveFileLinks } from "./file-resolver";
 
 /** Default number of variations to request when `{{n}}` is used. */
 const DEFAULT_VARIATION_COUNT = 3;
@@ -83,14 +84,17 @@ export function getParagraphContext(editor: Editor): string {
  * @param editor - The active editor.
  * @param provider - LLM provider to call.
  * @param prompt - Prompt whose `mode` must be `"collaborate"`.
+ * @param app - Obsidian App instance (used to resolve `[[wikilinks]]`).
  */
 export async function runCollaborate(
   editor: Editor,
   provider: LLMProvider,
-  prompt: Prompt
+  prompt: Prompt,
+  app: App
 ): Promise<void> {
   const before = getParagraphContext(editor);
-  const userPrompt = renderTemplate(prompt.userPromptTemplate, { before });
+  const resolvedTemplate = await resolveFileLinks(prompt.userPromptTemplate, app);
+  const userPrompt = renderTemplate(resolvedTemplate, { before });
 
   const response = await provider.complete({
     systemPrompt: prompt.systemPrompt,
@@ -111,12 +115,14 @@ export async function runCollaborate(
  * @param editor - The active editor.
  * @param provider - LLM provider to call.
  * @param prompt - Prompt whose `mode` must be `"rewrite"`.
+ * @param app - Obsidian App instance (used to resolve `[[wikilinks]]`).
  * @throws If no text is selected.
  */
 export async function runRewrite(
   editor: Editor,
   provider: LLMProvider,
-  prompt: Prompt
+  prompt: Prompt,
+  app: App
 ): Promise<void> {
   const selected = editor.getSelection();
   if (!selected) {
@@ -124,7 +130,8 @@ export async function runRewrite(
   }
 
   const { before, after } = getSelectionContext(editor);
-  const userPrompt = renderTemplate(prompt.userPromptTemplate, {
+  const resolvedTemplate = await resolveFileLinks(prompt.userPromptTemplate, app);
+  const userPrompt = renderTemplate(resolvedTemplate, {
     selected,
     before,
     after,
@@ -148,6 +155,7 @@ export async function runRewrite(
  * @param editor - The active editor (selection must be non-empty).
  * @param provider - LLM provider to call.
  * @param prompt - Prompt whose `mode` must be `"variations"`.
+ * @param app - Obsidian App instance (used to resolve `[[wikilinks]]`).
  * @param count - How many variations to request (default: `DEFAULT_VARIATION_COUNT`).
  * @returns Array of variation strings (may be shorter than `count` if the model
  *   returns fewer).
@@ -157,6 +165,7 @@ export async function runVariations(
   editor: Editor,
   provider: LLMProvider,
   prompt: Prompt,
+  app: App,
   count = DEFAULT_VARIATION_COUNT
 ): Promise<string[]> {
   const selected = editor.getSelection();
@@ -167,7 +176,8 @@ export async function runVariations(
   const { before, after } = getSelectionContext(editor);
   const n = String(count);
   const systemPrompt = renderTemplate(prompt.systemPrompt, { n });
-  const userPrompt = renderTemplate(prompt.userPromptTemplate, {
+  const resolvedTemplate = await resolveFileLinks(prompt.userPromptTemplate, app);
+  const userPrompt = renderTemplate(resolvedTemplate, {
     selected,
     before,
     after,

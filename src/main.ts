@@ -412,8 +412,8 @@ export default class writebraightPlugin extends Plugin {
     };
     const [startMsg, endMsg] = labels[mode];
     const run = mode === "collaborate"
-      ? () => runCollaborate(editor, createProvider(this.settings), prompt)
-      : () => runRewrite(editor, createProvider(this.settings), prompt);
+      ? () => runCollaborate(editor, createProvider(this.settings), prompt, this.app)
+      : () => runRewrite(editor, createProvider(this.settings), prompt, this.app);
     await this.runWithNotice(run, startMsg, endMsg);
   }
 

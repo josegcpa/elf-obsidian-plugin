@@ -79,7 +79,7 @@ Prompts use `{{placeholder}}` variables:
 
 ```bash
 git clone <repo>
-cd elf-plugin
+cd elf-obsidian-plugin
 npm install
 npm run build
 ```
@@ -87,7 +87,7 @@ npm run build
 Copy the built files into your vault:
 
 ```
-<vault>/.obsidian/plugins/elf-plugin/
+<vault>/.obsidian/plugins/elf-obsidian-plugin/
 ├── main.js
 ├── manifest.json
 └── styles.css
@@ -104,17 +104,24 @@ src/
 ├── main.ts                    # Plugin entry point
 ├── types.ts                   # Shared types and default values
 ├── engine.ts                  # Collaborate, Rewrite & Variations logic
+├── prompt-file.ts             # Prompt library management
 ├── settings-tab.ts            # Settings UI
 ├── variations-modal.ts        # Variations navigation modal
-└── providers/
-    ├── base.ts                # LLMProvider interface + HTTP helpers
-    ├── factory.ts             # createProvider() + default models
-    ├── openai.ts
-    ├── anthropic.ts
-    ├── google.ts
-    ├── mistral.ts
-    ├── ollama.ts
-    └── openrouter.ts
+├── providers/
+│   ├── base.ts                # LLMProvider interface + HTTP helpers
+│   ├── factory.ts             # createProvider() + default models
+│   ├── openai.ts
+│   ├── anthropic.ts
+│   ├── google.ts
+│   ├── mistral.ts
+│   ├── ollama.ts
+│   └── openrouter.ts
+└── tests/
+    ├── __mocks__/
+    │   └── obsidian.ts
+    ├── setup.ts
+    ├── engine.test.ts
+    └── providers.test.ts
 ```
 
 ### Adding a New Provider

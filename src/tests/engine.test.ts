@@ -1,4 +1,5 @@
 import { renderTemplate, getParagraphContext } from "../engine";
+import { App } from "obsidian";
 
 describe("renderTemplate", () => {
   it("substitutes {{before}}", () => {
