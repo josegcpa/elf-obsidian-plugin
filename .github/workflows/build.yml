@@ -3,6 +3,10 @@ name: Build and publish
 on:
   push:
     branches: [main]
+    paths:
+      - "src/*"
+      - "package.json"
+      - "package-lock.json"
 
 jobs:
   build:
