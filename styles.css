@@ -159,11 +159,11 @@
 
 /* Move notices from top-right to bottom-center */
 .notice-container {
-  top: auto !important;
-  bottom: 1rem !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
+  top: auto;
+  bottom: 1rem;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
