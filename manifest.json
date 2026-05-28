@@ -2,10 +2,9 @@
   "id": "elf-plugin",
   "name": "Elf",
   "version": "0.1.0",
-  "minAppVersion": "0.1.0",
+  "minAppVersion": "1.12.0",
   "description": "Get some help with your writing from your favourite assistant.",
   "author": "José Guilherme de Almeida",
   "authorUrl": "https://josegcpa.net",
-  "fundingUrl": "https://buymeacoffee.com/josegcpa",
-  "isDesktopOnly": false
+  "isDesktopOnly": true
 }
