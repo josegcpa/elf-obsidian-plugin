@@ -1,0 +1,55 @@
+name: Build and publish
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Push to build branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Switch to build branch (create orphan if it doesn't exist)
+          git fetch origin build || true
+          if git rev-parse --verify origin/build >/dev/null 2>&1; then
+            git checkout build
+          else
+            git checkout --orphan build
+            git rm -rf .
+          fi
+
+          # Copy build artefacts from the source checkout
+          git checkout main -- main.js manifest.json styles.css
+
+          git add main.js manifest.json styles.css
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Build from ${GITHUB_SHA::8}"
+            git push origin build
+          fi
