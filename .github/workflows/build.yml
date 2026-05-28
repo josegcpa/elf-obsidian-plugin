@@ -7,6 +7,7 @@ on:
       - "src/*"
       - "package.json"
       - "package-lock.json"
+      - ".github/workflows/build.yml"
 
 jobs:
   build:
@@ -45,7 +46,7 @@ jobs:
           # Switch to build branch (create orphan if it doesn't exist)
           git fetch origin build || true
           if git rev-parse --verify origin/build >/dev/null 2>&1; then
-            git checkout build
+            git checkout -f build
           else
             git checkout --orphan build
             git rm -rf .
