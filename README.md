@@ -1,13 +1,13 @@
-<center>
+<p align="center">
 <img src="assets/icon.png" alt="drawing" width="200"/>
-</center>
+</p>
 
-<center>
+<p align="center">
 <h1>Elf Obsidian plugin</h1>
 
 Elf is an [Obsidian](https://obsidian.md) plugin that brings AI writing assistance into your vault.
 It supports **six providers** and three distinct **modes of action**.
-</center>
+</p>
 
 ## Features
 
