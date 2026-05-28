@@ -34,6 +34,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Stash build artefacts (main.js is gitignored, so we must copy it manually)
+          mkdir -p /tmp/build-artefacts
+          cp main.js manifest.json styles.css /tmp/build-artefacts/
+
           # Switch to build branch (create orphan if it doesn't exist)
           git fetch origin build || true
           if git rev-parse --verify origin/build >/dev/null 2>&1; then
@@ -43,8 +47,8 @@ jobs:
             git rm -rf .
           fi
 
-          # Copy build artefacts from the source checkout
-          git checkout main -- main.js manifest.json styles.css
+          # Restore artefacts
+          cp /tmp/build-artefacts/* .
 
           git add main.js manifest.json styles.css
           if git diff --cached --quiet; then
