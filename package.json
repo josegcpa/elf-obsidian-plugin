@@ -1,6 +1,6 @@
 {
   "name": "elf-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Get some help with your writing from your favourite assistant.",
   "main": "main.js",
   "scripts": {
