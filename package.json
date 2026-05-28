@@ -8,7 +8,12 @@
     "build": "node esbuild.config.mjs production",
     "test": "jest"
   },
-  "keywords": ["obsidian-plugin", "ai", "writing", "assistant"],
+  "keywords": [
+    "obsidian-plugin",
+    "ai",
+    "writing",
+    "assistant"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
