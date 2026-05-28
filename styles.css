@@ -1,0 +1,170 @@
+.wr-variations-modal {
+  min-width: 520px;
+}
+
+.wr-variations-status {
+  font-size: var(--font-smaller);
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.wr-variations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.wr-variation-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1.5;
+}
+
+.wr-variation-item:hover,
+.wr-variation-selected {
+  background: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border);
+}
+
+.wr-variation-num {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+}
+
+.wr-variation-text {
+  flex: 1;
+  white-space: pre-wrap;
+}
+
+.wr-variations-hint {
+  font-size: var(--font-smaller);
+  color: var(--text-faint);
+  text-align: center;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.wr-variations-hint code {
+  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols", sans-serif;
+  font-size: 1.2em;
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+/* ── Settings sections ────────────────────────────────────────────────── */
+
+/* Consistent section spacing */
+.wr-prompt-library-section {
+  margin-top: 1.5rem;
+}
+
+.wr-prompt-library-section h3,
+.setting-item-heading {
+  margin-bottom: 0.75rem;
+}
+
+/* ── Compact prompt editor ──────────────────────────────────────────────── */
+
+.wr-prompt-editor {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  background: var(--background-secondary);
+}
+
+.wr-prompt-meta-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.wr-prompt-meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wr-prompt-meta-field input,
+.wr-prompt-meta-field select {
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-ui-small);
+  width: 100%;
+}
+
+.wr-field-label {
+  font-size: var(--font-smaller);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.wr-placeholder-hint {
+  margin: 0.25rem 0 0.5rem;
+  font-size: var(--font-smaller);
+}
+
+.wr-prompt-action-row {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.wr-prompt-action-row button {
+  font-size: var(--font-smaller);
+  cursor: pointer;
+}
+
+.wr-prompt-library-section hr {
+  border: none;
+  border-top: 1px solid var(--background-modifier-border);
+  margin: 0.5rem 0;
+}
+
+.wr-textarea {
+  font-family: var(--font-monospace);
+  font-size: var(--font-smaller);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 0.375rem 0.5rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* ── Notice positioning ─────────────────────────────────────────────── */
+
+/* Move notices from top-right to bottom-center */
+.notice-container {
+  top: auto !important;
+  bottom: 1rem !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
