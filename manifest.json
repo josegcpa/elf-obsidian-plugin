@@ -1,7 +1,7 @@
 {
   "id": "elf",
   "name": "Elf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.12.0",
   "description": "Get some help with your writing from your favourite assistant.",
   "author": "José Guilherme de Almeida",
